@@ -17,7 +17,7 @@ from core.utils import (
 from core.validate import validate_parsed_questions
 
 
-st.set_page_config(page_title="Exam Import Converter", layout="wide")
+st.set_page_config(page_title="Exam Converter", layout="wide")
 
 # Session defaults
 for key, default in {
@@ -32,7 +32,7 @@ for key, default in {
         st.session_state[key] = default
 
 
-st.sidebar.header("Import")
+st.sidebar.header("Exam Converter")
 uploaded_files = st.sidebar.file_uploader(
     "Upload DOCX or TXT exam files", type=["docx", "txt"], accept_multiple_files=True
 )
@@ -71,126 +71,363 @@ if parse_clicked:
                     st.session_state["table_rows"] = rows
 
 
-st.title("Exam Import Converter")
-st.write("Convert DOCX/TXT exam questions into CSV for import. Parse automatically, review, edit, and export.")
+st.markdown(
+    """
+ <style>
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+ :root {
+   --bg0: #06131d;
+   --bg1: #0a2233;
 
-# Tracked changes warning
-signals = st.session_state.get("signals", [])
-if any(sig.get("has_tracked_changes") for sig in signals if isinstance(sig, dict)):
-    st.warning("Tracked changes detected. Accept all changes in Word for best results.")
+   --surface: rgba(252, 250, 247, 0.96);
+   --surface-border: rgba(15, 23, 42, 0.12);
+   --card: #ffffff;
+   --card-border: rgba(15, 23, 42, 0.12);
 
-# Summary panel
-parsed = st.session_state.get("parsed", {}) if isinstance(st.session_state.get("parsed", {}), dict) else {}
-questions = parsed.get("questions", []) if isinstance(parsed, dict) else []
-total_questions = len(questions)
-validation_errors = st.session_state.get("validation_errors", []) or []
-warnings_count = sum(len(q.get("warnings", []) or []) for q in questions if isinstance(q, dict))
-tracked_files = [sig.get("source_filename") for sig in signals if isinstance(sig, dict) and sig.get("has_tracked_changes")]
+   --text: #0f172a;
+   --muted: #475569;
+   --accent: #ffb300;
+   --accent-2: #0a599d;
 
-with st.container():
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Total questions", total_questions)
-    col2.metric("Blocking errors", len(validation_errors))
-    col3.metric("Warnings", warnings_count)
-    col4.metric("Files with tracked changes", len(tracked_files))
+   --sidebar-bg: rgba(7, 26, 44, 0.96);
+   --sidebar-text: rgba(248, 250, 252, 0.92);
+   --sidebar-muted: rgba(248, 250, 252, 0.72);
 
-table_rows: List[dict] = st.session_state.get("table_rows", [])
-if table_rows:
-    st.subheader("Preview & Manual Overrides")
-    df = pd.DataFrame(table_rows)
-    edited_df = st.data_editor(
-        df,
-        num_rows="dynamic",
-        use_container_width=True,
-        key="questions_editor",
-        column_config={
-            "number": st.column_config.NumberColumn("Question #", disabled=True),
-            "title": st.column_config.TextColumn("Title"),
-            "option_A": st.column_config.TextColumn("Option A"),
-            "option_B": st.column_config.TextColumn("Option B"),
-            "option_C": st.column_config.TextColumn("Option C"),
-            "option_D": st.column_config.TextColumn("Option D"),
-            "correct_letter": st.column_config.SelectboxColumn("Correct", options=["A", "B", "C", "D"]),
-            "detected_answer_method": st.column_config.SelectboxColumn(
-                "Detected method",
-                options=["asterisk", "highlight", "answer_key", "inferred"],
-                disabled=True,
-            ),
-            "warnings": st.column_config.TextColumn("Warnings", disabled=True),
-            "delete": st.column_config.CheckboxColumn("Delete", default=False),
-        },
-    )
+   --shadow: rgba(0, 0, 0, 0.28);
+ }
 
-    if st.button("Apply manual edits", type="primary"):
-        rows = edited_df.to_dict(orient="records")
-        st.session_state["table_rows"] = rows
-        updated_questions = editor_rows_to_questions(rows)
-        normalized_questions = [normalize_question_fields(q) for q in updated_questions]
-        st.session_state["parsed"]["questions"] = normalized_questions
-        st.session_state["parsed"]["category"] = category
-        st.session_state["validation_errors"] = validate_parsed_questions(st.session_state["parsed"])
-        st.success("Manual edits applied and re-validated.")
+ html, body {
+   font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+ }
+ h1, h2, h3, h4 {
+   font-family: 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+   letter-spacing: -0.015em;
+ }
 
-    parsed = st.session_state.get("parsed", {})
-    if isinstance(parsed, dict) and parsed.get("questions"):
-        warning_questions = [
-            (q.get("number"), q.get("warnings") or [])
-            for q in parsed["questions"]
-            if q.get("warnings")
-        ]
-        if warning_questions:
-            st.subheader("Warnings")
-            for number, warns in warning_questions:
-                warns_list = warns if isinstance(warns, list) else [warns]
-                with st.expander(f"Question {number} warnings", expanded=False):
-                    for w in warns_list:
-                        st.write(f"- {w}")
+ /* Background */
+ .stApp {
+   background:
+     radial-gradient(1000px circle at 12% 0%, rgba(255, 179, 0, 0.16), transparent 45%),
+     radial-gradient(900px circle at 92% 10%, rgba(10, 89, 157, 0.18), transparent 46%),
+     linear-gradient(135deg, var(--bg0), var(--bg1));
+ }
+ [data-testid="stAppViewContainer"] > .main {
+   background: transparent;
+ }
 
-validation_errors = st.session_state.get("validation_errors", [])
-if validation_errors:
-    st.error("Validation errors:")
-    for err in validation_errors:
-        st.write(f"- {err}")
+ /* Main panel */
+ section.main .block-container {
+   background: var(--surface);
+   border: 1px solid var(--surface-border);
+   border-radius: 18px;
+   padding: 1.5rem 1.75rem;
+   box-shadow: 0 18px 45px var(--shadow);
+   margin-top: 0.75rem;
+   margin-bottom: 1.5rem;
+ }
+ section.main .block-container,
+ section.main .block-container p,
+ section.main .block-container li,
+ section.main .block-container label {
+   color: var(--text) !important;
+ }
+ section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6 {
+   color: var(--text) !important;
+ }
+ section.main .stCaption {
+   color: var(--muted) !important;
+ }
+ section.main .block-container .stMarkdown p,
+ section.main .block-container .stMarkdown li {
+   color: var(--text) !important;
+   line-height: 1.55;
+ }
+ section.main .block-container .stMarkdown a {
+   color: var(--accent-2) !important;
+ }
 
-can_export = bool(st.session_state.get("parsed")) and not validation_errors
-if not table_rows:
-    st.info("Upload files and click Parse & Preview to see questions here.")
+ /* Hero */
+ .hero {
+   background: linear-gradient(135deg, #071a2c, #0b2a40);
+   color: rgba(248, 250, 252, 0.95);
+   border: 1px solid rgba(255, 179, 0, 0.22);
+   padding: 1.25rem 1.5rem;
+   border-radius: 16px;
+   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
+   margin-bottom: 1rem;
+ }
+ .hero * {
+   color: inherit;
+ }
+ .hero .kicker {
+   text-transform: uppercase;
+   font-size: 0.75rem;
+   letter-spacing: 0.2em;
+   color: var(--accent);
+   margin-bottom: 0.35rem;
+ }
+ .hero .title {
+   font-size: 2.1rem;
+   margin: 0;
+ }
+ .hero .subtitle {
+   color: rgba(248, 250, 252, 0.82);
+   margin-top: 0.5rem;
+ }
 
-if can_export:
-    csv_bytes = build_csv_bytes(st.session_state["parsed"], st.session_state.get("category", ""))
-else:
-    csv_bytes = b""
+ /* Cards */
+ .section-card {
+   background: var(--card);
+   border: 1px solid var(--card-border);
+   padding: 1rem 1.25rem;
+   border-radius: 14px;
+   box-shadow: 0 10px 26px rgba(2, 12, 20, 0.08);
+ }
+ .badge {
+   display: inline-block;
+   padding: 0.25rem 0.6rem;
+   border-radius: 999px;
+   background: rgba(255, 179, 0, 0.22);
+   color: #071a2c;
+   font-weight: 700;
+   font-size: 0.75rem;
+ }
 
-st.download_button(
-    label="Export CSV",
-    data=csv_bytes,
-    file_name="exam-import.csv",
-    mime="text/csv",
-    disabled=not can_export,
-    type="primary",
-    use_container_width=True,
+ /* Sidebar */
+ [data-testid="stSidebar"] {
+   background: var(--sidebar-bg);
+   border-right: 1px solid rgba(255, 255, 255, 0.08);
+ }
+ [data-testid="stSidebar"] * {
+   color: var(--sidebar-text) !important;
+ }
+ [data-testid="stSidebar"] label,
+ [data-testid="stSidebar"] small,
+ [data-testid="stSidebar"] p {
+   color: var(--sidebar-muted) !important;
+ }
+ [data-testid="stSidebar"] input,
+ [data-testid="stSidebar"] textarea,
+ [data-testid="stSidebar"] [data-baseweb="select"] > div {
+   background: rgba(255, 255, 255, 0.08) !important;
+   border: 1px solid rgba(255, 255, 255, 0.16) !important;
+   border-radius: 10px !important;
+ }
+ [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
+   background: rgba(255, 255, 255, 0.06) !important;
+   border: 1px dashed rgba(255, 255, 255, 0.22) !important;
+   border-radius: 14px !important;
+ }
+
+ /* Tables */
+ [data-testid="stDataFrame"], [data-testid="stDataEditor"] {
+   background: #ffffff;
+   border-radius: 12px;
+   border: 1px solid rgba(15, 23, 42, 0.12);
+ }
+ [data-testid="stDataFrame"] *, [data-testid="stDataEditor"] * {
+   color: var(--text) !important;
+ }
+
+ /* Buttons */
+ .stButton > button, .stDownloadButton > button {
+   background: var(--accent) !important;
+   color: #071a2c !important;
+   border: none !important;
+   border-radius: 12px !important;
+   font-weight: 800 !important;
+   box-shadow: 0 10px 22px rgba(255, 179, 0, 0.18) !important;
+ }
+ .stButton > button:hover, .stDownloadButton > button:hover {
+   background: #ffca3a !important;
+   color: #071a2c !important;
+ }
+ .stButton > button:disabled, .stDownloadButton > button:disabled {
+   background: rgba(15, 23, 42, 0.12) !important;
+   color: rgba(15, 23, 42, 0.38) !important;
+   box-shadow: none !important;
+   cursor: not-allowed;
+ }
+
+ /* Tabs + metrics */
+ [data-testid="stMetricLabel"] {
+   color: var(--muted) !important;
+ }
+ [data-testid="stMetricValue"] {
+   color: var(--text) !important;
+ }
+ .stTabs [role="tab"] {
+   color: var(--muted) !important;
+   font-weight: 700;
+ }
+ .stTabs [role="tab"][aria-selected="true"] {
+   color: var(--text) !important;
+ }
+
+ /* Alerts */
+ [data-testid="stAlert"] {
+   background: #eef6ff;
+   color: #0b2237;
+   border: 1px solid rgba(10, 89, 157, 0.2);
+ }
+ [data-testid="stAlert"] * {
+   color: #0b2237 !important;
+ }
+ </style>
+    """,
+    unsafe_allow_html=True,
 )
 
+st.markdown(
+    """
+<div class="hero">
+  <div class="kicker">Converter Suite</div>
+  <div class="title">Exam Converter</div>
+  <div class="subtitle">Turn DOCX/TXT exams into validated CSV with answer detection, warnings, and manual overrides.</div>
+</div>
+    """,
+    unsafe_allow_html=True,
+)
 
-if debug_mode:
-    st.divider()
-    st.subheader("Debug")
-    if signals:
-        st.caption("Extraction metrics")
-        for sig in signals:
-            counts = sig.get("debug_counts") if isinstance(sig, dict) else None
-            if counts:
-                st.write(
-                    {
-                        "file": sig.get("source_filename"),
-                        "total_lines": counts.get("total_lines"),
-                        "question_starts": counts.get("question_starts"),
-                        "option_lines": counts.get("option_lines"),
-                        "answer_key_entries": counts.get("answer_key_entries"),
-                    }
-                )
-    st.caption("Document signal")
-    st.code(safe_json_dumps(st.session_state.get("signals", [])), language="json")
-    st.caption("Raw model outputs")
-    for i, raw in enumerate(st.session_state.get("raw_outputs", []), start=1):
-        st.code(raw or f"(empty response {i})")
+tab_exam, tab_future = st.tabs(["Exam Converter", "Another Converter (Coming Soon)"])
+
+with tab_exam:
+    st.write("Convert DOCX/TXT exam questions into CSV for import. Parse automatically, review, edit, and export.")
+
+    # Tracked changes warning
+    signals = st.session_state.get("signals", [])
+    if any(sig.get("has_tracked_changes") for sig in signals if isinstance(sig, dict)):
+        st.warning("Tracked changes detected. Accept all changes in Word for best results.")
+
+    # Summary panel
+    parsed = st.session_state.get("parsed", {}) if isinstance(st.session_state.get("parsed", {}), dict) else {}
+    questions = parsed.get("questions", []) if isinstance(parsed, dict) else []
+    total_questions = len(questions)
+    validation_errors = st.session_state.get("validation_errors", []) or []
+    warnings_count = sum(len(q.get("warnings", []) or []) for q in questions if isinstance(q, dict))
+    tracked_files = [
+        sig.get("source_filename")
+        for sig in signals
+        if isinstance(sig, dict) and sig.get("has_tracked_changes")
+    ]
+
+    with st.container():
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Total questions", total_questions)
+        col2.metric("Blocking errors", len(validation_errors))
+        col3.metric("Warnings", warnings_count)
+        col4.metric("Files with tracked changes", len(tracked_files))
+
+    table_rows: List[dict] = st.session_state.get("table_rows", [])
+    if table_rows:
+        st.subheader("Preview & Manual Overrides")
+        df = pd.DataFrame(table_rows)
+        edited_df = st.data_editor(
+            df,
+            num_rows="dynamic",
+            use_container_width=True,
+            key="questions_editor",
+            column_config={
+                "number": st.column_config.NumberColumn("Question #", disabled=True),
+                "title": st.column_config.TextColumn("Title"),
+                "option_A": st.column_config.TextColumn("Option A"),
+                "option_B": st.column_config.TextColumn("Option B"),
+                "option_C": st.column_config.TextColumn("Option C"),
+                "option_D": st.column_config.TextColumn("Option D"),
+                "correct_letter": st.column_config.SelectboxColumn("Correct", options=["A", "B", "C", "D"]),
+                "detected_answer_method": st.column_config.SelectboxColumn(
+                    "Detected method",
+                    options=["asterisk", "highlight", "answer_key", "inferred"],
+                    disabled=True,
+                ),
+                "warnings": st.column_config.TextColumn("Warnings", disabled=True),
+                "delete": st.column_config.CheckboxColumn("Delete", default=False),
+            },
+        )
+
+        if st.button("Apply manual edits", type="primary"):
+            rows = edited_df.to_dict(orient="records")
+            st.session_state["table_rows"] = rows
+            updated_questions = editor_rows_to_questions(rows)
+            normalized_questions = [normalize_question_fields(q) for q in updated_questions]
+            st.session_state["parsed"]["questions"] = normalized_questions
+            st.session_state["parsed"]["category"] = category
+            st.session_state["validation_errors"] = validate_parsed_questions(st.session_state["parsed"])
+            st.success("Manual edits applied and re-validated.")
+
+        parsed = st.session_state.get("parsed", {})
+        if isinstance(parsed, dict) and parsed.get("questions"):
+            warning_questions = [
+                (q.get("number"), q.get("warnings") or [])
+                for q in parsed["questions"]
+                if q.get("warnings")
+            ]
+            if warning_questions:
+                st.subheader("Warnings")
+                for number, warns in warning_questions:
+                    warns_list = warns if isinstance(warns, list) else [warns]
+                    with st.expander(f"Question {number} warnings", expanded=False):
+                        for w in warns_list:
+                            st.write(f"- {w}")
+
+    validation_errors = st.session_state.get("validation_errors", [])
+    if validation_errors:
+        st.error("Validation errors:")
+        for err in validation_errors:
+            st.write(f"- {err}")
+
+    can_export = bool(st.session_state.get("parsed")) and not validation_errors
+    if not table_rows:
+        st.info("Upload files and click Parse & Preview to see questions here.")
+
+    if can_export:
+        csv_bytes = build_csv_bytes(st.session_state["parsed"], st.session_state.get("category", ""))
+    else:
+        csv_bytes = b""
+
+    st.download_button(
+        label="Export CSV",
+        data=csv_bytes,
+        file_name="exam-import.csv",
+        mime="text/csv",
+        disabled=not can_export,
+        type="primary",
+        use_container_width=True,
+    )
+
+    if debug_mode:
+        st.divider()
+        st.subheader("Debug")
+        if signals:
+            st.caption("Extraction metrics")
+            for sig in signals:
+                counts = sig.get("debug_counts") if isinstance(sig, dict) else None
+                if counts:
+                    st.write(
+                        {
+                            "file": sig.get("source_filename"),
+                            "total_lines": counts.get("total_lines"),
+                            "question_starts": counts.get("question_starts"),
+                            "option_lines": counts.get("option_lines"),
+                            "answer_key_entries": counts.get("answer_key_entries"),
+                        }
+                    )
+        st.caption("Document signal")
+        st.code(safe_json_dumps(st.session_state.get("signals", [])), language="json")
+        st.caption("Raw model outputs")
+        for i, raw in enumerate(st.session_state.get("raw_outputs", []), start=1):
+            st.code(raw or f"(empty response {i})")
+
+with tab_future:
+    st.subheader("New Converter Slot")
+    st.markdown(
+        """
+<div class="section-card">
+  <span class="badge">Ready for next format</span>
+  <p><strong>Purpose:</strong> This space is reserved for a future converter targeting a different document type.</p>
+  <p><strong>Planned flow:</strong> upload → signal extraction → LLM parse → validation → export.</p>
+  <p>When you are ready, we can add a dedicated uploader, schema, and output mapping here without disturbing the exam pipeline.</p>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
