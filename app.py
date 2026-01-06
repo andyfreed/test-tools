@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List
 
 import pandas as pd
@@ -37,6 +38,13 @@ uploaded_files = st.sidebar.file_uploader(
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
+model_default = os.getenv("OPENAI_MODEL", "gpt-5.2")
+allowed_models = ["gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
+model_choice = st.sidebar.selectbox("Model", options=allowed_models + ["Custom"], index=0)
+if model_choice == "Custom":
+    model = st.sidebar.text_input("Custom model", value=model_default)
+else:
+    model = model_choice
 
 parse_clicked = st.sidebar.button("Parse & Preview", use_container_width=True)
 
@@ -47,7 +55,7 @@ if parse_clicked:
         with st.spinner("Parsing with OpenAI..."):
             try:
                 signals = build_document_signals(uploaded_files)
-                parsed, errors, raw_outputs = parse_with_llm(signals, category or "")
+                parsed, errors, raw_outputs = parse_with_llm(signals, category or "", model=model)
             except Exception as exc:  # noqa: BLE001 - show user-friendly errors
                 st.error(f"Parsing failed: {exc}")
             else:
