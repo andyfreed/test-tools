@@ -10,6 +10,7 @@ from openai import OpenAI
 load_dotenv()
 
 ENCODING_WARNING = "Normalized text encoding artifacts"
+PAGE_MARKER_PATTERN = re.compile(r"^\s*\[(?:p|pp)\.?\s*\d+(?:\s*-\s*\d+)?\]\s*", flags=re.IGNORECASE)
 
 
 def _append_warning(warnings: Optional[List[str]], message: str) -> None:
@@ -66,10 +67,18 @@ def normalize_text(text: str, warnings: Optional[List[str]] = None) -> str:
     return collapsed.strip()
 
 
+def strip_leading_page_marker(text: str) -> str:
+    """Remove a leading page reference like [p.23] or [p1-4] from question text."""
+    if not isinstance(text, str):
+        return ""
+    return re.sub(PAGE_MARKER_PATTERN, "", text, count=1)
+
+
 def normalize_question_fields(q: Dict[str, Any]) -> Dict[str, Any]:
     """Normalize title/options/warnings to avoid per-character iteration issues."""
     q = dict(q) if isinstance(q, dict) else {}
-    q["title"] = normalize_text(q.get("title", ""))
+    title = normalize_text(q.get("title", ""))
+    q["title"] = strip_leading_page_marker(title)
     options = q.get("options", ["", "", "", ""])
     q["options"] = [normalize_text(opt) for opt in options]
     warnings_raw = q.get("warnings", []) or []
