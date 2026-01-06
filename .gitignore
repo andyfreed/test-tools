@@ -12,3 +12,6 @@ Thumbs.db
 *.sqlite
 *.db
 /.streamlit/
+exam-answers-*.docx
+exam-answers-*.txt
+exam-with-answer-key-*.docx
