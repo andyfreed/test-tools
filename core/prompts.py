@@ -23,6 +23,8 @@ def build_user_prompt(document_signal: List[Dict[str, Any]], category: str) -> s
         "- Each question needs: number, title, four options (A-D), correct_index (0=A..3=D), detected_answer_method, warnings, source_refs.\n"
         "- Include source_refs pointing to paragraph/line indices you relied on.\n"
         "- If multiple conflicting signals exist, choose the best guess and include a warning.\n"
+        "- When the body lacks explicit numeric question markers, treat lines starting with '[' that contain 'p' (e.g., [p1-4]) as question starts and number questions sequentially by appearance. Do not try to match body numbers to the answer key when none exist.\n"
+        "- Parse the answer key independently; allow multiple entries per line. If no body numbers exist, align answers to questions by order of appearance (1..N) rather than by matching numbers.\n"
     )
     return guidance + "\nCategory: " + category + "\nDocument signal:\n" + safe_json_dumps(document_signal)
 

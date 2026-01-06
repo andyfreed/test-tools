@@ -14,6 +14,8 @@ ANSWER_KEY_ANNOTATION_PATTERN = re.compile(r"\s*\[[^\]]+\]\s*$")
 QUESTION_START_PATTERNS = [
     re.compile(r"^\s*(\d{1,4})[.)]\s+\S"),
     re.compile(r"^\s*Q(\d{1,4})[:.)]\s+\S", flags=re.IGNORECASE),
+    # Page-reference markers like [p1-4], [p2-6]
+    re.compile(r"^\s*\[[^\]]*p\d+[^\]]*\]", flags=re.IGNORECASE),
 ]
 OPTION_PATTERNS = [
     re.compile(r"^\s*[A-D][.)]\s+\S", flags=re.IGNORECASE),
