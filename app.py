@@ -47,7 +47,7 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 uploaded_files = st.sidebar.file_uploader(
-    "", type=["docx", "txt"], accept_multiple_files=True
+    "", type=["docx", "txt"], accept_multiple_files=True, key="uploaded_files"
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
@@ -60,6 +60,20 @@ else:
     model = model_choice
 
 parse_clicked = st.sidebar.button("Parse & Preview", use_container_width=True)
+reset_clicked = st.sidebar.button("Reset", use_container_width=True)
+
+if reset_clicked:
+    for key, default in {
+        "parsed": {},
+        "validation_errors": [],
+        "raw_outputs": [],
+        "signals": [],
+        "table_rows": [],
+        "category": "",
+        "uploaded_files": [],
+    }.items():
+        st.session_state[key] = default
+    st.rerun()
 
 if parse_clicked:
     if not uploaded_files:
