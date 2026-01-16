@@ -388,7 +388,7 @@ st.markdown(
    z-index: 9999;
  }
  .video-modal {
-   width: min(720px, 90vw);
+   width: min(1280px, 92vw);
    aspect-ratio: 16 / 9;
    border-radius: 16px;
    overflow: hidden;
