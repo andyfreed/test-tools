@@ -66,6 +66,23 @@ if parse_clicked:
         st.error("Upload at least one .docx or .txt file.")
     else:
         with st.spinner("Parsing with OpenAI..."):
+            modal_placeholder = st.empty()
+            modal_placeholder.markdown(
+                """
+<div class="video-modal-backdrop">
+  <div class="video-modal">
+    <iframe
+      src="https://www.youtube.com/embed/31RZ5wU-Fg0?autoplay=1&mute=1&rel=0"
+      title="Parsing in progress"
+      frameborder="0"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>
+  </div>
+</div>
+                """,
+                unsafe_allow_html=True,
+            )
             try:
                 signals = build_document_signals(uploaded_files)
                 parsed, errors, raw_outputs = parse_with_llm(signals, category or "", model=model)
@@ -82,6 +99,8 @@ if parse_clicked:
                 if parsed and isinstance(parsed, dict):
                     rows = normalize_questions_for_editor(parsed.get("questions", []))
                     st.session_state["table_rows"] = rows
+            finally:
+                modal_placeholder.empty()
 
 
 st.markdown(
@@ -331,6 +350,29 @@ st.markdown(
  [role="alert"] svg {
    color: #ffffff !important;
    fill: #ffffff !important;
+ }
+
+ /* Video modal */
+ .video-modal-backdrop {
+   position: fixed;
+   inset: 0;
+   background: rgba(0, 0, 0, 0.72);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   z-index: 9999;
+ }
+ .video-modal {
+   width: min(720px, 90vw);
+   aspect-ratio: 16 / 9;
+   border-radius: 16px;
+   overflow: hidden;
+   border: 1px solid rgba(255, 255, 255, 0.18);
+   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+ }
+ .video-modal iframe {
+   width: 100%;
+   height: 100%;
  }
  </style>
     """,
