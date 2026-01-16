@@ -34,7 +34,7 @@ for key, default in {
 
 st.sidebar.header("Exam Converter")
 uploaded_files = st.sidebar.file_uploader(
-    "Upload DOCX or TXT exam files", type=["docx", "txt"], accept_multiple_files=True
+    "Drop Files Here", type=["docx", "txt"], accept_multiple_files=True
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
@@ -228,6 +228,21 @@ st.markdown(
    background: rgba(255, 255, 255, 0.06) !important;
    border: 1px dashed rgba(255, 255, 255, 0.22) !important;
    border-radius: 14px !important;
+   position: relative !important;
+ }
+ [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stFileUploaderDropzoneInstructions"] {
+   visibility: hidden !important;
+ }
+ [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]::after {
+   content: "Drop Files Here";
+   position: absolute;
+   inset: 0;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   color: #ffffff;
+   font-weight: 700;
+   letter-spacing: 0.06em;
  }
 
  /* Tables */
@@ -312,9 +327,7 @@ st.markdown(
 st.markdown(
     """
 <div class="hero">
-  <div class="kicker">Converter Suite</div>
   <div class="title">Exam Converter</div>
-  <div class="subtitle">Turn DOCX/TXT exams into validated CSV with answer detection, warnings, and manual overrides.</div>
 </div>
     """,
     unsafe_allow_html=True,
