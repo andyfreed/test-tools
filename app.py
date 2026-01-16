@@ -190,7 +190,7 @@ st.markdown(
    color: inherit !important;
  }
  .info-card {
-   border: none;
+   border: none !important;
    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
  }
  .badge {
@@ -254,8 +254,9 @@ st.markdown(
    color: #ffffff !important;
  }
  .stButton > button:disabled, .stDownloadButton > button:disabled {
-   background: rgba(15, 23, 42, 0.12) !important;
-   color: rgba(15, 23, 42, 0.38) !important;
+   background: #000000 !important;
+   color: rgba(255, 255, 255, 0.35) !important;
+   border: none !important;
    box-shadow: none !important;
    cursor: not-allowed;
  }
