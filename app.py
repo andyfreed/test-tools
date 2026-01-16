@@ -189,6 +189,10 @@ st.markdown(
  .section-card * {
    color: inherit !important;
  }
+ .info-card {
+   border: none;
+   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+ }
  .badge {
    display: inline-block;
    padding: 0.25rem 0.6rem;
@@ -321,7 +325,7 @@ with tab_exam:
     st.write("Convert DOCX/TXT exam questions into CSV for import. Parse automatically, review, edit, and export.")
     st.markdown(
         """
-<div class="section-card">
+<div class="section-card info-card">
   <span class="badge">Before you upload</span>
   <ol>
     <li>Open the exam Word file from the author.</li>
@@ -418,7 +422,14 @@ with tab_exam:
 
     can_export = bool(st.session_state.get("parsed")) and not validation_errors
     if not table_rows:
-        st.info("Upload files and click Parse & Preview to see questions here.")
+        st.markdown(
+            """
+<div class="section-card">
+  <p>Upload files and click Parse &amp; Preview to see questions here.</p>
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if can_export:
         csv_bytes = build_csv_bytes(st.session_state["parsed"], st.session_state.get("category", ""))
