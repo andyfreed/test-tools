@@ -32,6 +32,20 @@ for key, default in {
         st.session_state[key] = default
 
 
+st.sidebar.markdown(
+    """
+<div class="section-card info-card">
+  <span class="badge">Before you upload</span>
+  <ol>
+    <li>Open the exam Word file from the author.</li>
+    <li>Accept all changes and stop tracking.</li>
+    <li>Remove chapter headings and anything other than the test questions and answer key (if applicable).</li>
+    <li>Save the file, then upload it here.</li>
+  </ol>
+</div>
+    """,
+    unsafe_allow_html=True,
+)
 uploaded_files = st.sidebar.file_uploader(
     "", type=["docx", "txt"], accept_multiple_files=True
 )
@@ -335,21 +349,6 @@ st.markdown(
 tab_exam, tab_future = st.tabs(["Exam Converter", "Another Converter (Coming Soon)"])
 
 with tab_exam:
-    st.markdown(
-        """
-<div class="section-card info-card">
-  <span class="badge">Before you upload</span>
-  <ol>
-    <li>Open the exam Word file from the author.</li>
-    <li>Accept all changes and stop tracking.</li>
-    <li>Remove chapter headings and anything other than the test questions and answer key (if applicable).</li>
-    <li>Save the file, then upload it here.</li>
-  </ol>
-</div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     # Tracked changes warning
     signals = st.session_state.get("signals", [])
     if any(sig.get("has_tracked_changes") for sig in signals if isinstance(sig, dict)):
