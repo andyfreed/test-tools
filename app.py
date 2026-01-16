@@ -434,14 +434,7 @@ with tab_exam:
 
     can_export = bool(st.session_state.get("parsed")) and not validation_errors
     if not table_rows:
-        st.markdown(
-            """
-<div class="section-card">
-  <p>Upload files and click Parse &amp; Preview to see questions here.</p>
-</div>
-            """,
-            unsafe_allow_html=True,
-        )
+        pass
 
     if can_export:
         csv_bytes = build_csv_bytes(st.session_state["parsed"], st.session_state.get("category", ""))
