@@ -12,6 +12,8 @@ load_dotenv()
 
 ENCODING_WARNING = "Normalized text encoding artifacts"
 PAGE_MARKER_PATTERN = re.compile(r"^\s*\[(?:p|pp)\.?\s*\d+(?:\s*-\s*\d+)?\]\s*", flags=re.IGNORECASE)
+QUESTION_NUMBER_PREFIX = re.compile(r"^\s*(?:Q\s*)?\d{1,4}[.)]\s+", flags=re.IGNORECASE)
+OPTION_PREFIX = re.compile(r"^\s*(?:\(?[A-D]\)|[A-D][.)])\s+", flags=re.IGNORECASE)
 
 
 def _append_warning(warnings: Optional[List[str]], message: str) -> None:
@@ -79,9 +81,10 @@ def normalize_question_fields(q: Dict[str, Any]) -> Dict[str, Any]:
     """Normalize title/options/warnings to avoid per-character iteration issues."""
     q = dict(q) if isinstance(q, dict) else {}
     title = normalize_text(q.get("title", ""))
-    q["title"] = strip_leading_page_marker(title)
+    title = strip_leading_page_marker(title)
+    q["title"] = QUESTION_NUMBER_PREFIX.sub("", title)
     options = q.get("options", ["", "", "", ""])
-    q["options"] = [normalize_text(opt) for opt in options]
+    q["options"] = [OPTION_PREFIX.sub("", normalize_text(opt)) for opt in options]
     warnings_raw = q.get("warnings", []) or []
     if isinstance(warnings_raw, str):
         warnings_raw = [warnings_raw]
