@@ -231,7 +231,7 @@ st.markdown(
    border: 1px dashed rgba(255, 255, 255, 0.22) !important;
    border-radius: 14px !important;
    position: relative !important;
-   padding-top: 2.25rem !important;
+   padding-top: 1.5rem !important;
    padding-bottom: 1.5rem !important;
    display: flex !important;
    flex-direction: column !important;
@@ -241,17 +241,6 @@ st.markdown(
  }
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stFileUploaderDropzoneInstructions"] {
    display: none !important;
- }
- [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]::after {
-   content: "Drop Files Here";
-   position: absolute;
-   top: 0.6rem;
-   left: 0;
-   right: 0;
-   text-align: center;
-   color: #ffffff;
-   font-weight: 700;
-   letter-spacing: 0.06em;
  }
  }
 
