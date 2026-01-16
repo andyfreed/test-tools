@@ -293,6 +293,20 @@ tab_exam, tab_future = st.tabs(["Exam Converter", "Another Converter (Coming Soo
 
 with tab_exam:
     st.write("Convert DOCX/TXT exam questions into CSV for import. Parse automatically, review, edit, and export.")
+    st.markdown(
+        """
+<div class="section-card">
+  <span class="badge">Before you upload</span>
+  <ol>
+    <li>Open the exam Word file from the author.</li>
+    <li>Accept all changes and stop tracking.</li>
+    <li>Remove chapter headings and anything other than the test questions and answer key (if applicable).</li>
+    <li>Save the file, then upload it here.</li>
+  </ol>
+</div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Tracked changes warning
     signals = st.session_state.get("signals", [])
