@@ -335,7 +335,6 @@ st.markdown(
 tab_exam, tab_future = st.tabs(["Exam Converter", "Another Converter (Coming Soon)"])
 
 with tab_exam:
-    st.write("Convert DOCX/TXT exam questions into CSV for import. Parse automatically, review, edit, and export.")
     st.markdown(
         """
 <div class="section-card info-card">
