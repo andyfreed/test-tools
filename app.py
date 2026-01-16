@@ -76,22 +76,22 @@ st.markdown(
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
  :root {
-   --bg0: #06131d;
-   --bg1: #0a2233;
+   --bg0: #000000;
+   --bg1: #141414;
 
-   --surface: rgba(252, 250, 247, 0.96);
-   --surface-border: rgba(15, 23, 42, 0.12);
+   --surface: rgba(255, 255, 255, 0.98);
+   --surface-border: rgba(0, 0, 0, 0.12);
    --card: #ffffff;
-   --card-border: rgba(15, 23, 42, 0.12);
+   --card-border: rgba(0, 0, 0, 0.12);
 
-   --text: #0f172a;
-   --muted: #475569;
-   --accent: #ffb300;
-   --accent-2: #0a599d;
+   --text: #0b0b0b;
+   --muted: #5a5a5a;
+   --accent: #111111;
+   --accent-2: #111111;
 
-   --sidebar-bg: rgba(7, 26, 44, 0.96);
-   --sidebar-text: rgba(248, 250, 252, 0.92);
-   --sidebar-muted: rgba(248, 250, 252, 0.72);
+   --sidebar-bg: rgba(0, 0, 0, 0.96);
+   --sidebar-text: rgba(255, 255, 255, 0.92);
+   --sidebar-muted: rgba(255, 255, 255, 0.72);
 
    --shadow: rgba(0, 0, 0, 0.28);
  }
@@ -107,8 +107,8 @@ st.markdown(
  /* Background */
  .stApp {
    background:
-     radial-gradient(1000px circle at 12% 0%, rgba(255, 179, 0, 0.16), transparent 45%),
-     radial-gradient(900px circle at 92% 10%, rgba(10, 89, 157, 0.18), transparent 46%),
+     radial-gradient(1000px circle at 12% 0%, rgba(255, 255, 255, 0.12), transparent 45%),
+     radial-gradient(900px circle at 92% 10%, rgba(255, 255, 255, 0.08), transparent 46%),
      linear-gradient(135deg, var(--bg0), var(--bg1));
  }
  [data-testid="stAppViewContainer"] > .main {
@@ -148,9 +148,9 @@ st.markdown(
 
  /* Hero */
  .hero {
-   background: linear-gradient(135deg, #071a2c, #0b2a40);
+   background: linear-gradient(135deg, #000000, #1a1a1a);
    color: rgba(248, 250, 252, 0.95);
-   border: 1px solid rgba(255, 179, 0, 0.22);
+   border: 1px solid rgba(255, 255, 255, 0.18);
    padding: 1.25rem 1.5rem;
    border-radius: 16px;
    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
@@ -163,7 +163,7 @@ st.markdown(
    text-transform: uppercase;
    font-size: 0.75rem;
    letter-spacing: 0.2em;
-   color: var(--accent);
+   color: #ffffff;
    margin-bottom: 0.35rem;
  }
  .hero .title {
@@ -187,8 +187,8 @@ st.markdown(
    display: inline-block;
    padding: 0.25rem 0.6rem;
    border-radius: 999px;
-   background: rgba(255, 179, 0, 0.22);
-   color: #071a2c;
+   background: rgba(0, 0, 0, 0.12);
+   color: #111111;
    font-weight: 700;
    font-size: 0.75rem;
  }
@@ -231,16 +231,16 @@ st.markdown(
 
  /* Buttons */
  .stButton > button, .stDownloadButton > button {
-   background: var(--accent) !important;
-   color: #071a2c !important;
+   background: #111111 !important;
+   color: #ffffff !important;
    border: none !important;
    border-radius: 12px !important;
    font-weight: 800 !important;
-   box-shadow: 0 10px 22px rgba(255, 179, 0, 0.18) !important;
+   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2) !important;
  }
  .stButton > button:hover, .stDownloadButton > button:hover {
-   background: #ffca3a !important;
-   color: #071a2c !important;
+   background: #000000 !important;
+   color: #ffffff !important;
  }
  .stButton > button:disabled, .stDownloadButton > button:disabled {
    background: rgba(15, 23, 42, 0.12) !important;
@@ -266,12 +266,12 @@ st.markdown(
 
  /* Alerts */
  [data-testid="stAlert"] {
-   background: #eef6ff;
-   color: #0b2237;
-   border: 1px solid rgba(10, 89, 157, 0.2);
+   background: #f2f2f2;
+   color: #111111;
+   border: 1px solid rgba(0, 0, 0, 0.18);
  }
  [data-testid="stAlert"] * {
-   color: #0b2237 !important;
+   color: #111111 !important;
  }
  </style>
     """,
