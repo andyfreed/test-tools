@@ -32,9 +32,8 @@ for key, default in {
         st.session_state[key] = default
 
 
-st.sidebar.header("Exam Converter")
 uploaded_files = st.sidebar.file_uploader(
-    "Drop Files Here", type=["docx", "txt"], accept_multiple_files=True
+    "", type=["docx", "txt"], accept_multiple_files=True
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
@@ -217,32 +216,43 @@ st.markdown(
  [data-testid="stSidebar"] p {
    color: var(--sidebar-muted) !important;
  }
- [data-testid="stSidebar"] input,
- [data-testid="stSidebar"] textarea,
- [data-testid="stSidebar"] [data-baseweb="select"] > div {
-   background: rgba(255, 255, 255, 0.08) !important;
-   border: 1px solid rgba(255, 255, 255, 0.16) !important;
-   border-radius: 10px !important;
- }
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] textarea,
+[data-testid="stSidebar"] [data-baseweb="select"] > div {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 10px !important;
+}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
+  margin: 0 auto !important;
+}
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
    background: rgba(255, 255, 255, 0.06) !important;
    border: 1px dashed rgba(255, 255, 255, 0.22) !important;
    border-radius: 14px !important;
    position: relative !important;
+   padding-top: 2.25rem !important;
+   padding-bottom: 1.5rem !important;
+   display: flex !important;
+   flex-direction: column !important;
+   align-items: center !important;
+   justify-content: center !important;
+   gap: 0.5rem !important;
  }
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stFileUploaderDropzoneInstructions"] {
-   visibility: hidden !important;
+   display: none !important;
  }
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"]::after {
    content: "Drop Files Here";
    position: absolute;
-   inset: 0;
-   display: flex;
-   align-items: center;
-   justify-content: center;
+   top: 0.6rem;
+   left: 0;
+   right: 0;
+   text-align: center;
    color: #ffffff;
    font-weight: 700;
    letter-spacing: 0.06em;
+ }
  }
 
  /* Tables */
