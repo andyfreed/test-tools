@@ -280,16 +280,22 @@ st.markdown(
  }
 
  /* Alerts */
- [data-testid="stAlert"] {
+ [data-testid="stAlert"],
+ [data-baseweb="notification"],
+ [role="alert"] {
    background: #0b0b0b !important;
    color: #ffffff !important;
    border: 1px solid #ffffff !important;
    box-shadow: none !important;
  }
- [data-testid="stAlert"] * {
+ [data-testid="stAlert"] *,
+ [data-baseweb="notification"] *,
+ [role="alert"] * {
    color: #ffffff !important;
  }
- [data-testid="stAlert"] svg {
+ [data-testid="stAlert"] svg,
+ [data-baseweb="notification"] svg,
+ [role="alert"] svg {
    color: #ffffff !important;
    fill: #ffffff !important;
  }
