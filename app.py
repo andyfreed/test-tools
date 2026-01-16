@@ -193,8 +193,9 @@ st.markdown(
    display: inline-block;
    padding: 0.25rem 0.6rem;
    border-radius: 999px;
-   background: #ffffff;
-   color: #000000;
+   background: #000000;
+   color: #ffffff;
+   border: 1px solid #ffffff;
    font-weight: 700;
    font-size: 0.75rem;
  }
@@ -237,16 +238,16 @@ st.markdown(
 
  /* Buttons */
  .stButton > button, .stDownloadButton > button {
-   background: #ffffff !important;
-   color: #000000 !important;
-   border: none !important;
+   background: #000000 !important;
+   color: #ffffff !important;
+   border: 1px solid #ffffff !important;
    border-radius: 12px !important;
    font-weight: 800 !important;
    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2) !important;
  }
  .stButton > button:hover, .stDownloadButton > button:hover {
-   background: #e6e6e6 !important;
-   color: #000000 !important;
+   background: #111111 !important;
+   color: #ffffff !important;
  }
  .stButton > button:disabled, .stDownloadButton > button:disabled {
    background: rgba(15, 23, 42, 0.12) !important;
