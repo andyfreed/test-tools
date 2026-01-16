@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
@@ -118,6 +119,28 @@ def index_to_letter(index: int) -> str:
     return mapping[index]
 
 
+def _coerce_question_number(value: Any, warnings: Optional[List[str]] = None) -> int:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and not math.isnan(value):
+        if not value.is_integer():
+            _append_warning(warnings, "Non-integer question number; truncated to integer")
+        return int(value)
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            _append_warning(warnings, "Missing question number; defaulted to 0")
+            return 0
+        match = re.search(r"\d+", stripped)
+        if match:
+            number = int(match.group(0))
+            if match.group(0) != stripped:
+                _append_warning(warnings, f"Normalized question number from '{stripped}' to {number}")
+            return number
+    _append_warning(warnings, "Invalid question number; defaulted to 0")
+    return 0
+
+
 def letter_to_index(letter: str) -> Optional[int]:
     mapping = {"A": 0, "B": 1, "C": 2, "D": 3}
     return mapping.get(letter.upper().strip()) if letter else None
@@ -162,18 +185,20 @@ def editor_rows_to_questions(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]
             normalize_text(row.get("option_D", "") or ""),
         ]
         correct_index = letter_to_index(row.get("correct_letter") or "")
+        warnings_list: List[str] = []
+        for w in (row.get("warnings", "") or "").split("|"):
+            cleaned = normalize_text(w)
+            if cleaned:
+                warnings_list.append(cleaned)
+        number = _coerce_question_number(row.get("number"), warnings_list)
         questions.append(
             {
-                "number": int(row.get("number") or 0),
+                "number": number,
                 "title": normalize_text(row.get("title", "") or ""),
                 "options": options,
                 "correct_index": 0 if correct_index is None else correct_index,
                 "detected_answer_method": row.get("detected_answer_method", "inferred"),
-                "warnings": [
-                    normalize_text(w)
-                    for w in (row.get("warnings", "") or "").split("|")
-                    if normalize_text(w)
-                ],
+                "warnings": warnings_list,
                 "source_refs": [],
             }
         )
