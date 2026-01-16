@@ -35,6 +35,8 @@ for key, default in {
 reset_clicked = st.sidebar.button("Reset", use_container_width=True)
 if reset_clicked:
     st.session_state.clear()
+    st.session_state["category"] = ""
+    st.session_state["uploaded_files"] = None
     st.rerun()
 
 st.sidebar.markdown(
@@ -51,7 +53,9 @@ st.sidebar.markdown(
     """,
     unsafe_allow_html=True,
 )
-uploaded_files = st.sidebar.file_uploader("", type=["docx", "txt"], accept_multiple_files=True)
+uploaded_files = st.sidebar.file_uploader(
+    "", type=["docx", "txt"], accept_multiple_files=True, key="uploaded_files"
+)
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
 model_default = os.getenv("OPENAI_MODEL", "gpt-5.2")
