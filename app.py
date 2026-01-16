@@ -34,9 +34,9 @@ for key, default in {
 
 st.sidebar.markdown(
     """
-<div class="section-card info-card">
-  <span class="badge">Before you upload</span>
-  <ol>
+<div class="section-card info-card sidebar-card">
+  <div class="sidebar-title">Before you upload</div>
+  <ol class="sidebar-list">
     <li>Open the exam Word file from the author.</li>
     <li>Accept all changes and stop tracking.</li>
     <li>Remove chapter headings and anything other than the test questions and answer key (if applicable).</li>
@@ -224,6 +224,31 @@ st.markdown(
  .info-card {
    border: none !important;
    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+ }
+ .sidebar-card {
+   padding: 0.9rem 1rem;
+   background: #060606;
+   border-radius: 16px;
+ }
+ .sidebar-title {
+   font-size: 0.85rem;
+   text-transform: uppercase;
+   letter-spacing: 0.12em;
+   color: rgba(255, 255, 255, 0.78);
+   margin-bottom: 0.6rem;
+ }
+ .sidebar-list {
+   margin: 0;
+   padding-left: 1.05rem;
+   color: #ffffff;
+   line-height: 1.45;
+   font-size: 0.9rem;
+ }
+ .sidebar-list li {
+   margin-bottom: 0.45rem;
+ }
+ .sidebar-list li:last-child {
+   margin-bottom: 0;
  }
  .badge {
    display: inline-block;
