@@ -79,13 +79,13 @@ st.markdown(
    --bg0: #000000;
    --bg1: #141414;
 
-   --surface: rgba(255, 255, 255, 0.98);
-   --surface-border: rgba(0, 0, 0, 0.12);
-   --card: #ffffff;
-   --card-border: rgba(0, 0, 0, 0.12);
+   --surface: rgba(0, 0, 0, 0.92);
+   --surface-border: rgba(255, 255, 255, 0.14);
+   --card: #050505;
+   --card-border: rgba(255, 255, 255, 0.16);
 
-   --text: #0b0b0b;
-   --muted: #5a5a5a;
+   --text: #f8fafc;
+   --muted: #b3b3b3;
    --accent: #111111;
    --accent-2: #111111;
 
@@ -117,11 +117,13 @@ st.markdown(
 
  /* Main panel */
  section.main .block-container {
-   background: var(--surface);
+   background: radial-gradient(circle at 10% -20%, rgba(255, 255, 255, 0.12), transparent 45%),
+     radial-gradient(circle at 85% 0%, rgba(255, 255, 255, 0.08), transparent 40%),
+     var(--surface);
    border: 1px solid var(--surface-border);
    border-radius: 18px;
    padding: 1.5rem 1.75rem;
-   box-shadow: 0 18px 45px var(--shadow);
+   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
    margin-top: 0.75rem;
    margin-bottom: 1.5rem;
  }
@@ -143,17 +145,17 @@ st.markdown(
    line-height: 1.55;
  }
  section.main .block-container .stMarkdown a {
-   color: var(--accent-2) !important;
+   color: #ffffff !important;
  }
 
  /* Hero */
  .hero {
-   background: linear-gradient(135deg, #000000, #1a1a1a);
+   background: linear-gradient(135deg, #000000, #202020);
    color: rgba(248, 250, 252, 0.95);
-   border: 1px solid rgba(255, 255, 255, 0.18);
+   border: 1px solid rgba(255, 255, 255, 0.22);
    padding: 1.25rem 1.5rem;
    border-radius: 16px;
-   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.32);
+   box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
    margin-bottom: 1rem;
  }
  .hero * {
@@ -177,18 +179,22 @@ st.markdown(
 
  /* Cards */
  .section-card {
-   background: var(--card);
+   background: linear-gradient(135deg, #050505, #0f0f0f);
    border: 1px solid var(--card-border);
    padding: 1rem 1.25rem;
    border-radius: 14px;
-   box-shadow: 0 10px 26px rgba(2, 12, 20, 0.08);
+   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+   color: #ffffff;
+ }
+ .section-card * {
+   color: inherit !important;
  }
  .badge {
    display: inline-block;
    padding: 0.25rem 0.6rem;
    border-radius: 999px;
-   background: rgba(0, 0, 0, 0.12);
-   color: #111111;
+   background: #ffffff;
+   color: #000000;
    font-weight: 700;
    font-size: 0.75rem;
  }
@@ -221,9 +227,9 @@ st.markdown(
 
  /* Tables */
  [data-testid="stDataFrame"], [data-testid="stDataEditor"] {
-   background: #ffffff;
+   background: #0b0b0b;
    border-radius: 12px;
-   border: 1px solid rgba(15, 23, 42, 0.12);
+   border: 1px solid rgba(255, 255, 255, 0.16);
  }
  [data-testid="stDataFrame"] *, [data-testid="stDataEditor"] * {
    color: var(--text) !important;
@@ -231,16 +237,16 @@ st.markdown(
 
  /* Buttons */
  .stButton > button, .stDownloadButton > button {
-   background: #111111 !important;
-   color: #ffffff !important;
+   background: #ffffff !important;
+   color: #000000 !important;
    border: none !important;
    border-radius: 12px !important;
    font-weight: 800 !important;
    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2) !important;
  }
  .stButton > button:hover, .stDownloadButton > button:hover {
-   background: #000000 !important;
-   color: #ffffff !important;
+   background: #e6e6e6 !important;
+   color: #000000 !important;
  }
  .stButton > button:disabled, .stDownloadButton > button:disabled {
    background: rgba(15, 23, 42, 0.12) !important;
@@ -257,21 +263,30 @@ st.markdown(
    color: var(--text) !important;
  }
  .stTabs [role="tab"] {
-   color: var(--muted) !important;
+   color: #ffffff !important;
    font-weight: 700;
  }
  .stTabs [role="tab"][aria-selected="true"] {
-   color: var(--text) !important;
+   color: #ffffff !important;
+ }
+ .stTabs [role="tablist"] {
+   background: #000000;
+   border-radius: 999px;
+   padding: 0.25rem;
+ }
+ .stTabs [role="tab"][aria-selected="true"]::after {
+   background: #ffffff !important;
  }
 
  /* Alerts */
  [data-testid="stAlert"] {
-   background: #f2f2f2;
-   color: #111111;
-   border: 1px solid rgba(0, 0, 0, 0.18);
+   background: #0b0b0b !important;
+   color: #ffffff !important;
+   border: 1px solid rgba(255, 255, 255, 0.18) !important;
+   box-shadow: none !important;
  }
  [data-testid="stAlert"] * {
-   color: #111111 !important;
+   color: #ffffff !important;
  }
  </style>
     """,
