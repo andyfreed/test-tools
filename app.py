@@ -283,11 +283,15 @@ st.markdown(
  [data-testid="stAlert"] {
    background: #0b0b0b !important;
    color: #ffffff !important;
-   border: 1px solid rgba(255, 255, 255, 0.18) !important;
+   border: 1px solid #ffffff !important;
    box-shadow: none !important;
  }
  [data-testid="stAlert"] * {
    color: #ffffff !important;
+ }
+ [data-testid="stAlert"] svg {
+   color: #ffffff !important;
+   fill: #ffffff !important;
  }
  </style>
     """,
