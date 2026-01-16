@@ -72,7 +72,7 @@ if parse_clicked:
 <div class="video-modal-backdrop">
   <div class="video-modal">
     <iframe
-      src="https://www.youtube.com/embed/31RZ5wU-Fg0?autoplay=1&mute=1&rel=0"
+      src="https://www.youtube.com/embed/31RZ5wU-Fg0?start=360&autoplay=1&mute=1&rel=0"
       title="Parsing in progress"
       frameborder="0"
       allow="autoplay; encrypted-media"
