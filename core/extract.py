@@ -78,12 +78,16 @@ def _analyze_question_patterns(texts: List[str]) -> Dict[str, int]:
 
 
 def _detect_tracked_changes(content: bytes) -> bool:
-    """Inspect word/document.xml for tracked change tags."""
+    """Inspect word/document.xml for tracked change tags with visible text."""
     try:
         with zipfile.ZipFile(io.BytesIO(content)) as zf:
             xml_bytes = zf.read("word/document.xml")
             xml_text = xml_bytes.decode("utf-8", errors="ignore")
-            return any(tag in xml_text for tag in ("<w:ins", "<w:del", "<w:moveFrom", "<w:moveTo"))
+            pattern = re.compile(
+                r"<w:(ins|del|moveFrom|moveTo)\b[^>]*>.*?<w:t\b[^>]*>\s*\S",
+                flags=re.IGNORECASE | re.DOTALL,
+            )
+            return bool(pattern.search(xml_text))
     except Exception:
         return False
 
