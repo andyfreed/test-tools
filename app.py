@@ -29,6 +29,7 @@ for key, default in {
     "category": "",
     "require_reload": False,
     "last_upload_fingerprint": None,
+    "uploader_key": "uploaded_files_v1",
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -56,7 +57,10 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 uploaded_files = st.sidebar.file_uploader(
-    "", type=["docx", "txt"], accept_multiple_files=True, key="uploaded_files"
+    "",
+    type=["docx", "txt"],
+    accept_multiple_files=True,
+    key=st.session_state.get("uploader_key", "uploaded_files_v1"),
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
@@ -119,7 +123,7 @@ if parse_clicked:
                     st.session_state["table_rows"] = rows
                 st.session_state["require_reload"] = True
                 st.session_state["last_upload_fingerprint"] = None
-                st.session_state["uploaded_files"] = None
+                st.session_state["uploader_key"] = f"uploaded_files_v{int(st.session_state.get('uploader_key', 'uploaded_files_v1').split('_v')[-1]) + 1}"
             finally:
                 modal_placeholder.empty()
 
