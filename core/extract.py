@@ -168,7 +168,14 @@ def build_document_signals(files: List[Any]) -> List[Dict[str, Any]]:
     signals: List[Dict[str, Any]] = []
     for uploaded in files:
         filename = getattr(uploaded, "name", "uploaded_file")
-        content = uploaded.read() if hasattr(uploaded, "read") else uploaded
+        if hasattr(uploaded, "getvalue"):
+            content = uploaded.getvalue()
+        elif hasattr(uploaded, "read"):
+            if hasattr(uploaded, "seek"):
+                uploaded.seek(0)
+            content = uploaded.read()
+        else:
+            content = uploaded
         if isinstance(content, str):
             content = content.encode("utf-8")
         lower = filename.lower()

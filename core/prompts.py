@@ -19,6 +19,7 @@ def build_user_prompt(document_signal: List[Dict[str, Any]], category: str) -> s
         "Rules:\n"
         "- Asterisks (*) or (**) surrounding or preceding/following an option mean that option is correct; strip asterisks in output.\n"
         "- In DOCX, any option paragraph with highlight marks the correct answer.\n"
+        "- DOCX list numbering can be omitted in extracted text; do not warn about missing A/B/C/D prefixes if options appear as a four-option block.\n"
         "- Answer keys at the end map question number to letter (A-D). Use them when present.\n"
         "- Each question needs: number, title, four options (A-D), correct_index (0=A..3=D), detected_answer_method, warnings, source_refs.\n"
         "- Include source_refs pointing to paragraph/line indices you relied on.\n"

@@ -193,13 +193,16 @@ def editor_rows_to_questions(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]
             cleaned = normalize_text(w)
             if cleaned:
                 warnings_list.append(cleaned)
+        if correct_index is None:
+            warnings_list.append("Missing correct answer; choose A-D before export")
+            correct_index = -1
         number = _coerce_question_number(row.get("number"), warnings_list)
         questions.append(
             {
                 "number": number,
                 "title": normalize_text(row.get("title", "") or ""),
                 "options": options,
-                "correct_index": 0 if correct_index is None else correct_index,
+                "correct_index": correct_index,
                 "detected_answer_method": row.get("detected_answer_method", "inferred"),
                 "warnings": warnings_list,
                 "source_refs": [],

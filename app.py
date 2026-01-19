@@ -27,6 +27,8 @@ for key, default in {
     "signals": [],
     "table_rows": [],
     "category": "",
+    "require_reload": False,
+    "last_upload_fingerprint": None,
 }.items():
     if key not in st.session_state:
         st.session_state[key] = default
@@ -58,6 +60,13 @@ uploaded_files = st.sidebar.file_uploader(
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
+
+if uploaded_files:
+    current_fingerprint = tuple((f.name, f.size) for f in uploaded_files)
+    if current_fingerprint != st.session_state.get("last_upload_fingerprint"):
+        st.session_state["last_upload_fingerprint"] = current_fingerprint
+        st.session_state["require_reload"] = False
+
 model_default = os.getenv("OPENAI_MODEL", "gpt-5.2")
 allowed_models = ["gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
 model_choice = st.sidebar.selectbox("Model", options=allowed_models + ["Custom"], index=0)
@@ -71,6 +80,8 @@ parse_clicked = st.sidebar.button("Parse & Preview", use_container_width=True)
 if parse_clicked:
     if not uploaded_files:
         st.error("Upload at least one .docx or .txt file.")
+    elif st.session_state.get("require_reload"):
+        st.error("Please re-upload files before parsing again.")
     else:
         with st.spinner("Parsing with OpenAI..."):
             modal_placeholder = st.empty()
@@ -106,6 +117,9 @@ if parse_clicked:
                 if parsed and isinstance(parsed, dict):
                     rows = normalize_questions_for_editor(parsed.get("questions", []))
                     st.session_state["table_rows"] = rows
+                st.session_state["require_reload"] = True
+                st.session_state["last_upload_fingerprint"] = None
+                st.session_state["uploaded_files"] = None
             finally:
                 modal_placeholder.empty()
 
@@ -306,7 +320,6 @@ st.markdown(
  }
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stFileUploaderDropzoneInstructions"] {
    display: none !important;
- }
  }
 
  /* Tables */
