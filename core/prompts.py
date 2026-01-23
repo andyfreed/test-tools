@@ -21,10 +21,12 @@ def build_user_prompt(document_signal: List[Dict[str, Any]], category: str) -> s
         "- In DOCX, any option paragraph with highlight marks the correct answer.\n"
         "- DOCX list numbering can be omitted in extracted text; do not warn about missing A/B/C/D prefixes if options appear as a four-option block.\n"
         "- Lines that start with roman numerals (I., II., III., IV., etc.) are part of the question stem; keep them in the title until A-D options begin.\n"
+        "- If a question has a list of statements (often implicitly I/II/III) followed by combined-choice options like 'I only', 'I & II only', 'Both I & II', 'Neither I nor II', treat the statement lines as part of the stem; the combined-choice lines are the options.\n"
         "- Answer keys at the end map question number to letter (A-D). Use them when present.\n"
         "- Each question needs: number, title, four options (A-D), correct_index (0=A..3=D), detected_answer_method, warnings, source_refs.\n"
         "- Include source_refs pointing to paragraph/line indices you relied on.\n"
         "- If multiple conflicting signals exist, choose the best guess and include a warning.\n"
+        "- Do not drop a question if its numeric prefix is missing or numbering skips; include it and number by order of appearance.\n"
         "- When the body lacks explicit numeric question markers, treat lines starting with '[' that contain 'p' (e.g., [p1-4]) as question starts and number questions sequentially by appearance. Do not try to match body numbers to the answer key when none exist.\n"
         "- Parse the answer key independently; allow multiple entries per line. If no body numbers exist, align answers to questions by order of appearance (1..N) rather than by matching numbers.\n"
     )
