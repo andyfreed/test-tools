@@ -431,7 +431,7 @@ st.markdown(
 st.markdown(
     """
 <div class="hero">
-  <div class="title">Exam Converter V1.0</div>
+  <div class="title">Exam Converter V1.1</div>
 </div>
     """,
     unsafe_allow_html=True,
