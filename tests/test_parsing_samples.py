@@ -5,6 +5,7 @@ import tempfile
 from docx import Document
 from docx.enum.text import WD_COLOR_INDEX
 
+from core.export_csv import build_csv_bytes
 from core.extract import extract_docx, extract_txt
 from core.utils import normalize_text
 from core.validate import validate_parsed_questions
@@ -66,3 +67,29 @@ def test_normalize_text_mojibake_cleanup():
     assert normalize_text("Reduce the modelâ€™s complexity") == "Reduce the model's complexity"
     assert normalize_text("Reduce the modelâs complexity") == "Reduce the model's complexity"
     assert normalize_text("Precision Ã— Recall") == "Precision × Recall"
+
+
+def test_csv_export_uses_utf8_bom():
+    payload = {
+        "questions": [
+            {
+                "number": 1,
+                "title": "F1 score’s formula",
+                "options": [
+                    "(Precision + Recall) ÷ 2",
+                    "2 × (Precision × Recall) ÷ (Precision + Recall)",
+                    "Precision × Recall",
+                    "Precision + Recall",
+                ],
+                "correct_index": 1,
+                "detected_answer_method": "inferred",
+                "warnings": [],
+                "source_refs": [{"kind": "line", "index": 0}],
+            }
+        ]
+    }
+    data = build_csv_bytes(payload, "test")
+    assert data.startswith(b\"\\xef\\xbb\\xbf\")
+    decoded = data.decode(\"utf-8-sig\")
+    assert \"×\" in decoded
+    assert \"÷\" in decoded

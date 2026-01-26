@@ -63,4 +63,5 @@ def build_csv_bytes(parsed: Dict[str, List[Dict]], category: str) -> bytes:
                 row[h] = ""
         writer.writerow(row)
 
-    return output.getvalue().encode("utf-8")
+    # Use UTF-8 with BOM so Excel on Windows reliably detects encoding.
+    return output.getvalue().encode("utf-8-sig")
