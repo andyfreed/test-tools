@@ -55,6 +55,11 @@ def _clean_mojibake(text: str) -> Tuple[str, bool]:
         if bad in cleaned:
             cleaned = cleaned.replace(bad, good)
             fixed = True
+    if "â" in cleaned:
+        repaired = re.sub(r"â([A-Za-z])", r"'\1", cleaned)
+        if repaired != cleaned:
+            cleaned = repaired
+            fixed = True
     return cleaned, fixed
 
 

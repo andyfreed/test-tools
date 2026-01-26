@@ -64,4 +64,5 @@ def test_validation():
 
 def test_normalize_text_mojibake_cleanup():
     assert normalize_text("Reduce the modelâ€™s complexity") == "Reduce the model's complexity"
+    assert normalize_text("Reduce the modelâs complexity") == "Reduce the model's complexity"
     assert normalize_text("Precision Ã— Recall") == "Precision × Recall"
