@@ -86,29 +86,54 @@ def _parse_response_to_json(response: Any) -> Tuple[Dict[str, Any], str]:
     return parsed, raw_text
 
 
+RESPONSES_API_MODELS = {"gpt-5.4-pro"}
+
+
 def _call_model(system_prompt: str, user_prompt: str, response_format: Dict[str, Any], model: str) -> Tuple[Dict[str, Any], str]:
     load_dotenv()
     http_client = httpx.Client(trust_env=False)
     client = OpenAI(http_client=http_client)
     try:
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_format={
-                "type": "json_schema",
-                "json_schema": {
-                    "name": SCHEMA_NAME,
-                    "strict": True,
-                    "schema": response_format,
+        if model in RESPONSES_API_MODELS:
+            response = client.responses.create(
+                model=model,
+                instructions=system_prompt,
+                input=user_prompt,
+                text={
+                    "format": {
+                        "type": "json_schema",
+                        "name": SCHEMA_NAME,
+                        "strict": True,
+                        "schema": response_format,
+                    }
                 },
-            },
-        )
+            )
+            raw_text = response.output_text or ""
+            parsed: Dict[str, Any] = {}
+            try:
+                parsed = json.loads(raw_text)
+            except json.JSONDecodeError:
+                parsed = {}
+            return parsed, raw_text
+        else:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "name": SCHEMA_NAME,
+                        "strict": True,
+                        "schema": response_format,
+                    },
+                },
+            )
+            return _parse_response_to_json(response)
     except OpenAIError as exc:
         raise RuntimeError(f"OpenAI call failed: {exc}") from exc
-    return _parse_response_to_json(response)
 
 
 def parse_with_llm(
