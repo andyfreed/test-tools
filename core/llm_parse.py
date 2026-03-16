@@ -86,7 +86,7 @@ def _parse_response_to_json(response: Any) -> Tuple[Dict[str, Any], str]:
     return parsed, raw_text
 
 
-RESPONSES_API_MODELS = {"gpt-5.4-pro"}
+RESPONSES_API_MODELS = {"gpt-5.4-pro", "gpt-5.4"}
 
 
 def _call_model(system_prompt: str, user_prompt: str, response_format: Dict[str, Any], model: str) -> Tuple[Dict[str, Any], str]:
