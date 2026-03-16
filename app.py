@@ -72,7 +72,7 @@ if uploaded_files:
         st.session_state["require_reload"] = False
 
 model_default = os.getenv("OPENAI_MODEL", "gpt-5.2")
-allowed_models = ["gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
+allowed_models = ["gpt-5.4-pro", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
 model_choice = st.sidebar.selectbox("Model", options=allowed_models + ["Custom"], index=0)
 if model_choice == "Custom":
     model = st.sidebar.text_input("Custom model", value=model_default)
