@@ -109,6 +109,8 @@ def normalize_question_fields(q: Dict[str, Any]) -> Dict[str, Any]:
     title = q.get("title", "")
     normalized_warnings = _filter_blank_year_warnings(title, normalized_warnings)
     q["warnings"] = normalized_warnings
+    if "confidence" not in q:
+        q["confidence"] = "low"
     return q
 
 
@@ -185,6 +187,7 @@ def normalize_questions_for_editor(questions: List[Dict[str, Any]]) -> List[Dict
                 "option_D": options[3] if len(options) > 3 else "",
                 "correct_letter": index_to_letter(q.get("correct_index", 0)),
                 "detected_answer_method": q.get("detected_answer_method", "inferred"),
+                "confidence": q.get("confidence", "low"),
                 "warnings": " | ".join(warnings_raw),
                 "delete": False,
             }
@@ -221,6 +224,7 @@ def editor_rows_to_questions(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]
                 "options": options,
                 "correct_index": correct_index,
                 "detected_answer_method": row.get("detected_answer_method", "inferred"),
+                "confidence": row.get("confidence", "low"),
                 "warnings": warnings_list,
                 "source_refs": [],
             }

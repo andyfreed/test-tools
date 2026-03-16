@@ -486,6 +486,11 @@ with tab_exam:
                     options=["asterisk", "highlight", "answer_key", "inferred"],
                     disabled=True,
                 ),
+                "confidence": st.column_config.SelectboxColumn(
+                    "Confidence",
+                    options=["high", "medium", "low"],
+                    disabled=True,
+                ),
                 "warnings": st.column_config.TextColumn("Warnings", disabled=True),
                 "delete": st.column_config.CheckboxColumn("Delete", default=False),
             },

@@ -30,12 +30,19 @@ def validate_parsed_questions(data: Dict[str, Any]) -> List[str]:
             for oi, opt in enumerate(options):
                 if not isinstance(opt, str) or not opt.strip():
                     errors.append(f"{prefix}: option {oi + 1} is empty.")
+            # Detect exact duplicate options
+            stripped = [opt.strip().lower() for opt in options if isinstance(opt, str)]
+            if len(stripped) != len(set(stripped)):
+                errors.append(f"{prefix}: duplicate options detected.")
         correct_index = q.get("correct_index")
         if not isinstance(correct_index, int) or correct_index < 0 or correct_index > 3:
             errors.append(f"{prefix}: correct_index must be between 0 and 3.")
         dam = q.get("detected_answer_method")
         if dam not in {"asterisk", "highlight", "answer_key", "inferred"}:
             errors.append(f"{prefix}: detected_answer_method invalid.")
+        confidence = q.get("confidence")
+        if confidence not in {"high", "medium", "low"}:
+            errors.append(f"{prefix}: confidence must be high, medium, or low.")
     return errors
 
 

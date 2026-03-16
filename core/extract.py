@@ -34,6 +34,23 @@ def _strip_answer_key_annotation(text: str) -> str:
     return re.sub(ANSWER_KEY_ANNOTATION_PATTERN, "", text or "")
 
 
+def _has_asterisk_marker(text: str) -> bool:
+    """Detect asterisk markers that likely flag a correct answer."""
+    if not text or "*" not in text:
+        return False
+    stripped = text.strip()
+    # Leading asterisks: *text or **text (not bare bullet *)
+    if re.match(r"^\*{1,2}\s*\S", stripped):
+        return True
+    # Trailing asterisks: text* or text**
+    if re.search(r"\S\s*\*{1,2}$", stripped):
+        return True
+    # Asterisks wrapping text after option prefix: A) *text*
+    if re.match(r"^\s*(?:\(?[A-D]\)|[A-D][.)])\s*\*{1,2}\S", stripped, re.IGNORECASE):
+        return True
+    return False
+
+
 def _decode_text_bytes(content: bytes) -> Tuple[str, bool]:
     """
     Decode bytes using a prioritized encoding list, avoiding heavy use of U+FFFD.
@@ -109,6 +126,7 @@ def extract_docx(content: bytes, filename: str) -> Dict[str, Any]:
                 "line_index": line_index,
                 "text": text,
                 "has_highlight": bool(has_highlight),
+                "has_asterisk": _has_asterisk_marker(text),
             }
         )
         line_index += 1
@@ -126,8 +144,11 @@ def extract_docx(content: bytes, filename: str) -> Dict[str, Any]:
             for cell in row.cells:
                 for para in cell.paragraphs:
                     text = normalize_text(para.text or "")
-                    # Table paragraphs rarely have highlight; treat as False by default.
-                    append_paragraph(text, has_highlight=False)
+                    has_highlight = any(
+                        run.text and run.text.strip() and run.font.highlight_color is not None
+                        for run in para.runs
+                    )
+                    append_paragraph(text, has_highlight)
 
     debug_counts = _analyze_question_patterns([p["text"] for p in paragraphs])
     return {
@@ -149,7 +170,12 @@ def extract_txt(content: bytes, filename: str) -> Dict[str, Any]:
         text = normalize_text(raw, warnings=warnings)
         if not text:
             continue
-        lines.append({"i": line_index, "line_index": line_index, "text": text})
+        lines.append({
+            "i": line_index,
+            "line_index": line_index,
+            "text": text,
+            "has_asterisk": _has_asterisk_marker(text),
+        })
         line_index += 1
     if had_artifacts:
         _add_warning(warnings, ENCODING_WARNING)
