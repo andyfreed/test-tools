@@ -256,7 +256,7 @@ def _chunk_signals(
 def parse_with_llm(
     document_signal: List[Dict[str, Any]],
     category: str,
-    model: str = os.getenv("OPENAI_MODEL", "gpt-5.2"),
+    model: str = os.getenv("OPENAI_MODEL", "gpt-5.4"),
     max_repairs: int = 2,
 ) -> Tuple[Dict[str, Any], List[str], List[str]]:
     """
