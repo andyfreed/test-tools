@@ -149,16 +149,15 @@ def _call_claude(system_prompt: str, user_prompt: str, response_format: Dict[str
         + json.dumps(response_format, indent=2)
     )
     try:
-        response = client.messages.create(
+        raw_text = ""
+        with client.messages.stream(
             model=model,
             max_tokens=32768,
             system=system_prompt + schema_hint,
             messages=[{"role": "user", "content": user_prompt}],
-        )
-        raw_text = ""
-        for block in response.content:
-            if hasattr(block, "text"):
-                raw_text += block.text
+        ) as stream:
+            for text in stream.text_stream:
+                raw_text += text
         # Strip markdown code fences if the model wrapped the JSON
         stripped = raw_text.strip()
         if stripped.startswith("```"):
