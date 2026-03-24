@@ -95,7 +95,8 @@ if parse_clicked:
     elif st.session_state.get("require_reload"):
         st.error("Please re-upload files before parsing again.")
     else:
-        with st.spinner("Parsing with OpenAI..."):
+        with st.spinner("Parsing..."):
+            progress_bar = st.progress(0, text="Extracting document signal...")
             modal_placeholder = st.empty()
             modal_placeholder.markdown(
                 """
@@ -115,7 +116,15 @@ if parse_clicked:
             )
             try:
                 signals = build_document_signals(uploaded_files, docx_as_txt=docx_as_txt)
-                parsed, errors, raw_outputs = parse_with_llm(signals, category or "", model=model)
+                progress_bar.progress(5, text="Sending to LLM...")
+
+                def _on_chunk(completed: int, total: int) -> None:
+                    pct = int(5 + 90 * completed / total)
+                    progress_bar.progress(pct, text=f"Chunk {completed}/{total} complete")
+
+                parsed, errors, raw_outputs = parse_with_llm(
+                    signals, category or "", model=model, on_chunk_complete=_on_chunk,
+                )
             except Exception as exc:  # noqa: BLE001 - show user-friendly errors
                 st.error(f"Parsing failed: {exc}")
             else:
@@ -134,6 +143,7 @@ if parse_clicked:
                 st.session_state["uploader_key"] = f"uploaded_files_v{int(st.session_state.get('uploader_key', 'uploaded_files_v1').split('_v')[-1]) + 1}"
             finally:
                 modal_placeholder.empty()
+                progress_bar.empty()
 
 
 st.markdown(

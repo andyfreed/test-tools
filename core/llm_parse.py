@@ -310,6 +310,7 @@ def parse_with_llm(
     category: str,
     model: str = os.getenv("OPENAI_MODEL", "claude-sonnet-4-6"),
     max_repairs: int = 2,
+    on_chunk_complete: Any = None,
 ) -> Tuple[Dict[str, Any], List[str], List[str]]:
     """
     Parse the document signal with the LLM, chunking large documents and
@@ -368,6 +369,9 @@ def parse_with_llm(
             chunk_warnings.append(
                 f"Chunk {chunk_idx + 1}/{len(chunks)}: returned 0 questions (expected ~{expected})"
             )
+
+        if on_chunk_complete is not None:
+            on_chunk_complete(chunk_idx + 1, len(chunks))
 
     # Renumber questions sequentially across all chunks
     for i, q in enumerate(all_questions, start=1):
