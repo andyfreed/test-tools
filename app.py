@@ -44,13 +44,13 @@ if reset_clicked:
 
 st.sidebar.markdown(
     """
-<div class="section-card info-card sidebar-card">
-  <div class="sidebar-title">Before you upload</div>
-  <ol class="sidebar-list">
-    <li>Open the exam Word file from the author.</li>
-    <li>Accept all changes and stop tracking.</li>
-    <li>Remove chapter headings and anything other than the test questions and answer key (if applicable).</li>
-    <li>Save the file, then upload it here.</li>
+<div class="instructions-card">
+  <h4 class="instructions-title">Instructions</h4>
+  <ol class="instructions-list">
+    <li>Open the exam Word file from the author</li>
+    <li>Accept all changes and stop tracking</li>
+    <li>Remove chapter headings and anything other than the test questions and answer key</li>
+    <li>Save the file, then upload it here</li>
   </ol>
 </div>
     """,
@@ -63,15 +63,7 @@ uploaded_files = st.sidebar.file_uploader(
     key=st.session_state.get("uploader_key", "uploaded_files_v1"),
     label_visibility="collapsed",
 )
-category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
-docx_as_txt = st.sidebar.toggle("Convert DOCX to TXT first", value=False, help="Extract plain text from DOCX before parsing (can improve results for some files)")
-debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
-
-if uploaded_files:
-    current_fingerprint = tuple((f.name, f.size) for f in uploaded_files)
-    if current_fingerprint != st.session_state.get("last_upload_fingerprint"):
-        st.session_state["last_upload_fingerprint"] = current_fingerprint
-        st.session_state["require_reload"] = False
+category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""), placeholder="e.g. Chapter 1")
 
 model_default = os.getenv("OPENAI_MODEL", "claude-sonnet-4-6")
 allowed_models = ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001", "gpt-5.4-pro", "gpt-5.4", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
@@ -83,9 +75,18 @@ model_choice = st.sidebar.selectbox(
     index=model_options.index(default_model_choice),
 )
 if model_choice == "Custom":
-    model = st.sidebar.text_input("Custom model", value=model_default)
+    model = st.sidebar.text_input("Custom model", value=model_default, placeholder="Custom model ID")
 else:
     model = model_choice
+
+docx_as_txt = st.sidebar.toggle("Convert DOCX to TXT first", value=False, help="Extract plain text from DOCX before parsing (can improve results for some files)")
+debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
+
+if uploaded_files:
+    current_fingerprint = tuple((f.name, f.size) for f in uploaded_files)
+    if current_fingerprint != st.session_state.get("last_upload_fingerprint"):
+        st.session_state["last_upload_fingerprint"] = current_fingerprint
+        st.session_state["require_reload"] = False
 
 parse_clicked = st.sidebar.button("Parse & Preview", use_container_width=True)
 
@@ -146,30 +147,13 @@ if parse_clicked:
                 progress_bar.empty()
 
 
+# ---------------------------------------------------------------------------
+# Styles — adapted from Figma design
+# ---------------------------------------------------------------------------
 st.markdown(
     """
  <style>
  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
- :root {
-   --bg0: #000000;
-   --bg1: #141414;
-
-   --surface: rgba(0, 0, 0, 0.92);
-   --surface-border: rgba(255, 255, 255, 0.14);
-   --card: #050505;
-   --card-border: rgba(255, 255, 255, 0.16);
-
-   --text: #f8fafc;
-   --muted: #b3b3b3;
-   --accent: #111111;
-   --accent-2: #111111;
-
-   --sidebar-bg: rgba(0, 0, 0, 0.96);
-   --sidebar-text: rgba(255, 255, 255, 0.92);
-   --sidebar-muted: rgba(255, 255, 255, 0.72);
-
-   --shadow: rgba(0, 0, 0, 0.28);
- }
 
  html, body {
    font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
@@ -179,26 +163,18 @@ st.markdown(
    letter-spacing: -0.015em;
  }
 
- /* Background */
+ /* ── App background ── */
  .stApp {
-   background:
-     radial-gradient(1000px circle at 12% 0%, rgba(255, 255, 255, 0.12), transparent 45%),
-     radial-gradient(900px circle at 92% 10%, rgba(255, 255, 255, 0.08), transparent 46%),
-     linear-gradient(135deg, var(--bg0), var(--bg1));
+   background: #0e0e0e;
  }
  [data-testid="stAppViewContainer"] > .main {
    background: transparent;
  }
 
- /* Main panel */
+ /* ── Main panel ── */
  section.main .block-container {
-   background: radial-gradient(circle at 10% -20%, rgba(255, 255, 255, 0.12), transparent 45%),
-     radial-gradient(circle at 85% 0%, rgba(255, 255, 255, 0.08), transparent 40%),
-     var(--surface);
-   border: 1px solid var(--surface-border);
-   border-radius: 18px;
+   background: transparent;
    padding: 1.5rem 1.75rem;
-   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
    margin-top: 0.75rem;
    margin-bottom: 1.5rem;
  }
@@ -206,132 +182,113 @@ st.markdown(
  section.main .block-container p,
  section.main .block-container li,
  section.main .block-container label {
-   color: var(--text) !important;
+   color: #f8fafc !important;
  }
- section.main h1, section.main h2, section.main h3, section.main h4, section.main h5, section.main h6 {
-   color: var(--text) !important;
+ section.main h1, section.main h2, section.main h3,
+ section.main h4, section.main h5, section.main h6 {
+   color: #f8fafc !important;
  }
  section.main .stCaption {
-   color: var(--muted) !important;
+   color: rgba(255,255,255,0.5) !important;
  }
  section.main .block-container .stMarkdown p,
  section.main .block-container .stMarkdown li {
-   color: var(--text) !important;
+   color: #f8fafc !important;
    line-height: 1.55;
  }
  section.main .block-container .stMarkdown a {
    color: #ffffff !important;
  }
 
- /* Hero */
+ /* ── Hero banner ── */
  .hero {
-   background: linear-gradient(135deg, #000000, #202020);
-   color: rgba(248, 250, 252, 0.95);
-   border: 1px solid rgba(255, 255, 255, 0.22);
-   padding: 1.25rem 1.5rem;
-   border-radius: 16px;
-   box-shadow: 0 16px 50px rgba(0, 0, 0, 0.55);
-   margin-bottom: 1rem;
- }
- .hero * {
-   color: inherit;
- }
- .hero .kicker {
-   text-transform: uppercase;
-   font-size: 0.75rem;
-   letter-spacing: 0.2em;
+   background: linear-gradient(to right, #050505, #0f0f0f);
    color: #ffffff;
-   margin-bottom: 0.35rem;
+   border: 1px solid rgba(255,255,255,0.10);
+   padding: 1.5rem;
+   border-radius: 16px;
+   margin-bottom: 1.5rem;
  }
  .hero .title {
-   font-size: 2.1rem;
+   font-family: 'Space Grotesk', sans-serif;
+   font-size: 1.75rem;
+   font-weight: 600;
    margin: 0;
- }
- .hero .subtitle {
-   color: rgba(248, 250, 252, 0.82);
-   margin-top: 0.5rem;
+   color: #ffffff;
  }
 
- /* Cards */
+ /* ── Instructions card (sidebar) ── */
+ .instructions-card {
+   background: linear-gradient(to bottom, #050505, #0f0f0f);
+   border: 1px solid rgba(255,255,255,0.10);
+   border-radius: 14px;
+   padding: 1rem;
+ }
+ .instructions-title {
+   font-family: 'Space Grotesk', sans-serif;
+   color: rgba(255,255,255,0.9) !important;
+   font-size: 0.85rem;
+   margin-bottom: 0.5rem;
+ }
+ .instructions-list {
+   margin: 0;
+   padding-left: 1.1rem;
+   color: rgba(255,255,255,0.6) !important;
+   font-size: 0.85rem;
+   line-height: 1.5;
+ }
+ .instructions-list li {
+   margin-bottom: 0.35rem;
+   color: rgba(255,255,255,0.6) !important;
+ }
+ .instructions-list li:last-child { margin-bottom: 0; }
+
+ /* ── Generic card ── */
  .section-card {
-   background: linear-gradient(135deg, #050505, #0f0f0f);
-   border: 1px solid var(--card-border);
+   background: linear-gradient(to bottom, #050505, #0f0f0f);
+   border: 1px solid rgba(255,255,255,0.10);
    padding: 1rem 1.25rem;
    border-radius: 14px;
-   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
    color: #ffffff;
  }
- .section-card * {
-   color: inherit !important;
- }
- .info-card {
-   border: none !important;
-   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
- }
- .sidebar-card {
-   padding: 0.9rem 1rem;
-   background: #060606;
-   border-radius: 16px;
- }
- .sidebar-title {
-   font-size: 0.85rem;
-   text-transform: uppercase;
-   letter-spacing: 0.12em;
-   color: rgba(255, 255, 255, 0.78);
-   margin-bottom: 0.6rem;
- }
- .sidebar-list {
-   margin: 0;
-   padding-left: 1.05rem;
-   color: #ffffff;
-   line-height: 1.45;
-   font-size: 0.9rem;
- }
- .sidebar-list li {
-   margin-bottom: 0.45rem;
- }
- .sidebar-list li:last-child {
-   margin-bottom: 0;
- }
+ .section-card * { color: inherit !important; }
  .badge {
    display: inline-block;
-   padding: 0.25rem 0.6rem;
+   padding: 0.25rem 0.75rem;
    border-radius: 999px;
-   background: #000000;
-   color: #ffffff;
-   border: 1px solid #ffffff;
-   font-weight: 700;
+   background: rgba(255,255,255,0.10);
+   color: rgba(255,255,255,0.6);
    font-size: 0.75rem;
+   border: none;
  }
 
- /* Sidebar */
+ /* ── Sidebar ── */
  [data-testid="stSidebar"] {
-   background: var(--sidebar-bg);
-   border-right: 1px solid rgba(255, 255, 255, 0.08);
+   background: #0a0a0a;
+   border-right: 1px solid rgba(255,255,255,0.10);
  }
  [data-testid="stSidebar"] * {
-   color: var(--sidebar-text) !important;
+   color: rgba(255,255,255,0.92) !important;
  }
  [data-testid="stSidebar"] label,
  [data-testid="stSidebar"] small,
  [data-testid="stSidebar"] p {
-   color: var(--sidebar-muted) !important;
+   color: rgba(255,255,255,0.70) !important;
  }
-[data-testid="stSidebar"] input,
-[data-testid="stSidebar"] textarea,
-[data-testid="stSidebar"] [data-baseweb="select"] > div {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border: 1px solid rgba(255, 255, 255, 0.16) !important;
-  border-radius: 10px !important;
-}
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
-  margin: 0 auto !important;
-}
+ [data-testid="stSidebar"] input,
+ [data-testid="stSidebar"] textarea,
+ [data-testid="stSidebar"] [data-baseweb="select"] > div {
+   background: rgba(255,255,255,0.05) !important;
+   border: 1px solid rgba(255,255,255,0.10) !important;
+   border-radius: 10px !important;
+ }
+ [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {
+   margin: 0 auto !important;
+ }
  [data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {
-   background: rgba(255, 255, 255, 0.06) !important;
-   border: 1px dashed rgba(255, 255, 255, 0.22) !important;
+   background: transparent !important;
+   border: 2px dashed rgba(255,255,255,0.15) !important;
    border-radius: 14px !important;
-   position: relative !important;
    padding-top: 1.5rem !important;
    padding-bottom: 1.5rem !important;
    display: flex !important;
@@ -344,67 +301,97 @@ st.markdown(
    display: none !important;
  }
 
- /* Tables */
- [data-testid="stDataFrame"], [data-testid="stDataEditor"] {
-   background: #0b0b0b;
-   border-radius: 12px;
-   border: 1px solid rgba(255, 255, 255, 0.16);
+ /* ── Metrics ── */
+ [data-testid="stMetricLabel"] {
+   color: rgba(255,255,255,0.5) !important;
+   font-size: 0.75rem !important;
  }
- [data-testid="stDataFrame"] *, [data-testid="stDataEditor"] * {
-   color: var(--text) !important;
+ [data-testid="stMetricValue"] {
+   color: #ffffff !important;
+   font-family: 'Space Grotesk', sans-serif !important;
+ }
+ [data-testid="stMetric"] {
+   background: linear-gradient(to bottom, #050505, #0f0f0f);
+   border: 1px solid rgba(255,255,255,0.10);
+   border-radius: 14px;
+   padding: 1rem;
  }
 
- /* Buttons */
+ /* ── Tables ── */
+ [data-testid="stDataFrame"], [data-testid="stDataEditor"] {
+   background: linear-gradient(to bottom, #050505, #0f0f0f);
+   border-radius: 14px;
+   border: 1px solid rgba(255,255,255,0.10);
+   overflow: hidden;
+ }
+ [data-testid="stDataFrame"] *, [data-testid="stDataEditor"] * {
+   color: #f8fafc !important;
+ }
+
+ /* ── Buttons ── */
  .stButton > button, .stDownloadButton > button {
    background: #000000 !important;
    color: #ffffff !important;
-   border: 1px solid #ffffff !important;
+   border: 1px solid rgba(255,255,255,0.20) !important;
    border-radius: 12px !important;
-   font-weight: 800 !important;
-   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.2) !important;
+   font-weight: 500 !important;
+   transition: background 0.15s ease !important;
  }
  .stButton > button:hover, .stDownloadButton > button:hover {
-   background: #111111 !important;
+   background: rgba(255,255,255,0.05) !important;
    color: #ffffff !important;
  }
  .stButton > button:disabled, .stDownloadButton > button:disabled {
    background: #000000 !important;
-   color: rgba(255, 255, 255, 0.35) !important;
-   border: none !important;
-   box-shadow: none !important;
+   color: rgba(255,255,255,0.30) !important;
+   border: 1px solid transparent !important;
    cursor: not-allowed;
  }
 
- /* Tabs + metrics */
- [data-testid="stMetricLabel"] {
-   color: var(--muted) !important;
- }
- [data-testid="stMetricValue"] {
-   color: var(--text) !important;
+ /* ── Tabs ── */
+ .stTabs [role="tablist"] {
+   background: transparent;
+   border-bottom: 1px solid rgba(255,255,255,0.10);
+   gap: 0.25rem;
  }
  .stTabs [role="tab"] {
-   color: #ffffff !important;
-   font-weight: 700;
+   color: rgba(255,255,255,0.50) !important;
+   font-weight: 500;
+   border-radius: 8px 8px 0 0;
+   padding: 0.625rem 1rem;
+ }
+ .stTabs [role="tab"]:hover {
+   color: rgba(255,255,255,0.70) !important;
  }
  .stTabs [role="tab"][aria-selected="true"] {
    color: #ffffff !important;
- }
- .stTabs [role="tablist"] {
-   background: #000000;
-   border-radius: 999px;
-   padding: 0.25rem;
+   background: rgba(255,255,255,0.10);
  }
  .stTabs [role="tab"][aria-selected="true"]::after {
    background: #ffffff !important;
+   height: 2px !important;
  }
 
- /* Alerts */
+ /* ── Alerts ── */
+ [data-testid="stAlert"][data-baseweb-type="warning"],
+ .warning-alert {
+   background: rgba(234,179,8,0.10) !important;
+   border: 1px solid rgba(234,179,8,0.30) !important;
+   border-radius: 14px !important;
+ }
+ [data-testid="stAlert"][data-baseweb-type="error"],
+ .error-alert {
+   background: rgba(239,68,68,0.10) !important;
+   border: 1px solid rgba(239,68,68,0.30) !important;
+   border-radius: 14px !important;
+ }
  [data-testid="stAlert"],
  [data-baseweb="notification"],
  [role="alert"] {
-   background: #0b0b0b !important;
+   background: rgba(255,255,255,0.05) !important;
    color: #ffffff !important;
-   border: 1px solid #ffffff !important;
+   border: 1px solid rgba(255,255,255,0.10) !important;
+   border-radius: 14px !important;
    box-shadow: none !important;
  }
  [data-testid="stAlert"] *,
@@ -419,11 +406,37 @@ st.markdown(
    fill: #ffffff !important;
  }
 
- /* Video modal */
+ /* ── Expander (warnings) ── */
+ .streamlit-expanderHeader {
+   background: transparent !important;
+   border: 1px solid rgba(255,255,255,0.10) !important;
+   border-radius: 10px !important;
+   color: rgba(255,255,255,0.70) !important;
+ }
+ .streamlit-expanderContent {
+   border: 1px solid rgba(255,255,255,0.10) !important;
+   border-top: none !important;
+   border-radius: 0 0 10px 10px !important;
+ }
+
+ /* ── Progress bar ── */
+ [data-testid="stProgress"] > div > div {
+   background: rgba(255,255,255,0.10) !important;
+   border-radius: 999px !important;
+ }
+ [data-testid="stProgress"] > div > div > div {
+   background: rgba(255,255,255,0.60) !important;
+   border-radius: 999px !important;
+ }
+
+ /* ── Confidence badges via data-editor ── */
+ /* These are handled by Streamlit's built-in rendering */
+
+ /* ── Video modal ── */
  .video-modal-backdrop {
    position: fixed;
    inset: 0;
-   background: rgba(0, 0, 0, 0.72);
+   background: rgba(0,0,0,0.72);
    display: flex;
    align-items: center;
    justify-content: center;
@@ -434,18 +447,42 @@ st.markdown(
    aspect-ratio: 16 / 9;
    border-radius: 16px;
    overflow: hidden;
-   border: 1px solid rgba(255, 255, 255, 0.18);
-   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+   border: 1px solid rgba(255,255,255,0.18);
+   box-shadow: 0 24px 80px rgba(0,0,0,0.6);
  }
  .video-modal iframe {
    width: 100%;
    height: 100%;
+ }
+
+ /* ── Empty state ── */
+ .empty-state {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   justify-content: center;
+   padding: 5rem 1rem;
+   color: rgba(255,255,255,0.30);
+ }
+ .empty-state svg {
+   width: 48px;
+   height: 48px;
+   margin-bottom: 1rem;
+   stroke: currentColor;
+   fill: none;
+ }
+ .empty-state p {
+   color: rgba(255,255,255,0.30) !important;
+   font-size: 0.95rem;
  }
  </style>
     """,
     unsafe_allow_html=True,
 )
 
+# ---------------------------------------------------------------------------
+# Hero
+# ---------------------------------------------------------------------------
 st.markdown(
     """
 <div class="hero">
@@ -455,6 +492,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# ---------------------------------------------------------------------------
+# Tabs
+# ---------------------------------------------------------------------------
 tab_exam, tab_future = st.tabs(["Exam Converter", "Another Converter (Coming Soon)"])
 
 with tab_exam:
@@ -463,7 +503,7 @@ with tab_exam:
     if any(sig.get("has_tracked_changes") for sig in signals if isinstance(sig, dict)):
         st.warning("Tracked changes detected. Accept all changes in Word for best results.")
 
-    # Summary panel
+    # Summary metrics
     parsed = st.session_state.get("parsed", {}) if isinstance(st.session_state.get("parsed", {}), dict) else {}
     questions = parsed.get("questions", []) if isinstance(parsed, dict) else []
     total_questions = len(questions)
@@ -480,7 +520,7 @@ with tab_exam:
         col1.metric("Total questions", total_questions)
         col2.metric("Blocking errors", len(validation_errors))
         col3.metric("Warnings", warnings_count)
-        col4.metric("Files with tracked changes", len(tracked_files))
+        col4.metric("Files w/ tracked changes", len(tracked_files))
 
     table_rows: List[dict] = st.session_state.get("table_rows", [])
     if table_rows:
@@ -492,29 +532,29 @@ with tab_exam:
             use_container_width=True,
             key="questions_editor",
             column_config={
-                "number": st.column_config.NumberColumn("Question #", disabled=True),
-                "title": st.column_config.TextColumn("Title"),
-                "option_A": st.column_config.TextColumn("Option A"),
-                "option_B": st.column_config.TextColumn("Option B"),
-                "option_C": st.column_config.TextColumn("Option C"),
-                "option_D": st.column_config.TextColumn("Option D"),
+                "number": st.column_config.NumberColumn("#", disabled=True, width="small"),
+                "title": st.column_config.TextColumn("Title", width="large"),
+                "option_A": st.column_config.TextColumn("A"),
+                "option_B": st.column_config.TextColumn("B"),
+                "option_C": st.column_config.TextColumn("C"),
+                "option_D": st.column_config.TextColumn("D"),
                 "correct_letter": st.column_config.SelectboxColumn("Correct", options=["A", "B", "C", "D"]),
                 "detected_answer_method": st.column_config.SelectboxColumn(
-                    "Detected method",
+                    "Method",
                     options=["asterisk", "highlight", "answer_key", "inferred"],
                     disabled=True,
                 ),
                 "confidence": st.column_config.SelectboxColumn(
-                    "Confidence",
+                    "Conf.",
                     options=["high", "medium", "low"],
                     disabled=True,
                 ),
                 "warnings": st.column_config.TextColumn("Warnings", disabled=True),
-                "delete": st.column_config.CheckboxColumn("Delete", default=False),
+                "delete": st.column_config.CheckboxColumn("Del", default=False),
             },
         )
 
-        if st.button("Apply manual edits", type="primary"):
+        if st.button("Apply manual edits", type="primary", use_container_width=True):
             rows = edited_df.to_dict(orient="records")
             st.session_state["table_rows"] = rows
             updated_questions = editor_rows_to_questions(rows)
@@ -524,6 +564,7 @@ with tab_exam:
             st.session_state["validation_errors"] = validate_parsed_questions(st.session_state["parsed"])
             st.success("Manual edits applied and re-validated.")
 
+        # Warnings section
         parsed = st.session_state.get("parsed", {})
         if isinstance(parsed, dict) and parsed.get("questions"):
             warning_questions = [
@@ -539,15 +580,15 @@ with tab_exam:
                         for w in warns_list:
                             st.write(f"- {w}")
 
+    # Validation errors
     validation_errors = st.session_state.get("validation_errors", [])
     if validation_errors:
         st.error("Validation errors:")
         for err in validation_errors:
             st.write(f"- {err}")
 
+    # Export
     can_export = bool(st.session_state.get("parsed")) and not validation_errors
-    if not table_rows:
-        pass
 
     if can_export:
         csv_bytes = build_csv_bytes(st.session_state["parsed"], st.session_state.get("category", ""))
@@ -564,6 +605,21 @@ with tab_exam:
         use_container_width=True,
     )
 
+    # Empty state
+    if not table_rows and not validation_errors:
+        st.markdown(
+            """
+<div class="empty-state">
+  <svg viewBox="0 0 24 24" stroke-width="1.5">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+  <p>Upload exam files and click "Parse & Preview" to begin</p>
+</div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Debug section
     if debug_mode:
         st.divider()
         st.subheader("Debug")
@@ -572,15 +628,13 @@ with tab_exam:
             for sig in signals:
                 counts = sig.get("debug_counts") if isinstance(sig, dict) else None
                 if counts:
-                    st.write(
-                        {
-                            "file": sig.get("source_filename"),
-                            "total_lines": counts.get("total_lines"),
-                            "question_starts": counts.get("question_starts"),
-                            "option_lines": counts.get("option_lines"),
-                            "answer_key_entries": counts.get("answer_key_entries"),
-                        }
-                    )
+                    st.code(json.dumps({
+                        "file": sig.get("source_filename"),
+                        "total_lines": counts.get("total_lines"),
+                        "question_starts": counts.get("question_starts"),
+                        "option_lines": counts.get("option_lines"),
+                        "answer_key_entries": counts.get("answer_key_entries"),
+                    }, indent=2), language="json")
         st.caption("Document signal")
         st.code(safe_json_dumps(st.session_state.get("signals", [])), language="json")
         st.caption("Raw model outputs")
@@ -588,14 +642,14 @@ with tab_exam:
             st.code(raw or f"(empty response {i})")
 
 with tab_future:
-    st.subheader("New Converter Slot")
     st.markdown(
         """
-<div class="section-card">
+<div class="section-card" style="text-align: center; padding: 2rem;">
   <span class="badge">Ready for next format</span>
-  <p><strong>Purpose:</strong> This space is reserved for a future converter targeting a different document type.</p>
-  <p><strong>Planned flow:</strong> upload → signal extraction → LLM parse → validation → export.</p>
-  <p>When you are ready, we can add a dedicated uploader, schema, and output mapping here without disturbing the exam pipeline.</p>
+  <h3 style="font-family: 'Space Grotesk', sans-serif; margin-top: 1rem;">Another Converter</h3>
+  <p style="color: rgba(255,255,255,0.5) !important; max-width: 28rem; margin: 0.5rem auto 0;">
+    Planned flow: upload &rarr; signal extraction &rarr; LLM parse &rarr; validation &rarr; export
+  </p>
 </div>
         """,
         unsafe_allow_html=True,
