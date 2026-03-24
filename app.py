@@ -72,8 +72,8 @@ if uploaded_files:
         st.session_state["last_upload_fingerprint"] = current_fingerprint
         st.session_state["require_reload"] = False
 
-model_default = os.getenv("OPENAI_MODEL", "gpt-5.4")
-allowed_models = ["gpt-5.4-pro", "gpt-5.4", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini", "claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"]
+model_default = os.getenv("OPENAI_MODEL", "claude-sonnet-4-6")
+allowed_models = ["claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001", "gpt-5.4-pro", "gpt-5.4", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini"]
 model_options = allowed_models + ["Custom"]
 default_model_choice = model_default if model_default in allowed_models else "Custom"
 model_choice = st.sidebar.selectbox(
