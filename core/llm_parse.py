@@ -78,7 +78,7 @@ EXAM_SCHEMA = {
 
 RESPONSES_API_MODELS = {"gpt-5.4-pro", "gpt-5.4"}
 CLAUDE_MODELS = {"claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"}
-CHUNK_SIZE = 30
+CHUNK_SIZE = 20
 
 # ---------------------------------------------------------------------------
 # Patterns for chunking (mirrors extract.py to avoid circular imports)
@@ -151,7 +151,7 @@ def _call_claude(system_prompt: str, user_prompt: str, response_format: Dict[str
     try:
         response = client.messages.create(
             model=model,
-            max_tokens=16384,
+            max_tokens=32768,
             system=system_prompt + schema_hint,
             messages=[{"role": "user", "content": user_prompt}],
         )
@@ -321,10 +321,24 @@ def parse_with_llm(
     system_prompt = build_system_prompt()
     chunks = _chunk_signals(document_signal)
 
+    # Count expected questions per chunk for loss detection
+    expected_per_chunk: List[int] = []
+    for chunk in chunks:
+        sig = chunk[0]
+        key = _items_key(sig)
+        items = sig.get(key, [])
+        ak_set = {it.get("i") for it in _find_answer_key_section(items)}
+        eq = sum(
+            1 for it in items
+            if _is_question_start(it.get("text", "")) and it.get("i") not in ak_set
+        )
+        expected_per_chunk.append(eq)
+
     all_questions: List[Dict[str, Any]] = []
     all_raw_outputs: List[str] = []
+    chunk_warnings: List[str] = []
 
-    for chunk in chunks:
+    for chunk_idx, chunk in enumerate(chunks):
         user_prompt = build_user_prompt(chunk, category)
         parsed, raw_text = _call_model(system_prompt, user_prompt, EXAM_SCHEMA, model=model)
         if isinstance(parsed, dict) and isinstance(parsed.get("questions"), list):
@@ -343,11 +357,28 @@ def parse_with_llm(
             errors = validate_parsed_questions(parsed)
 
         if isinstance(parsed, dict) and isinstance(parsed.get("questions"), list):
+            got = len(parsed["questions"])
+            expected = expected_per_chunk[chunk_idx]
+            if got < expected:
+                chunk_warnings.append(
+                    f"Chunk {chunk_idx + 1}/{len(chunks)}: got {got} questions, expected ~{expected}"
+                )
             all_questions.extend(parsed["questions"])
+        else:
+            expected = expected_per_chunk[chunk_idx]
+            chunk_warnings.append(
+                f"Chunk {chunk_idx + 1}/{len(chunks)}: returned 0 questions (expected ~{expected})"
+            )
 
     # Renumber questions sequentially across all chunks
     for i, q in enumerate(all_questions, start=1):
         q["number"] = i
+
+    # Attach chunk loss warnings to the first question if any
+    if chunk_warnings and all_questions:
+        first_warnings = all_questions[0].get("warnings", []) or []
+        first_warnings.extend(chunk_warnings)
+        all_questions[0]["warnings"] = first_warnings
 
     merged: Dict[str, Any] = {"category": category, "questions": all_questions}
     final_errors = validate_parsed_questions(merged)
