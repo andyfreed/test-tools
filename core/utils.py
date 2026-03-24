@@ -75,6 +75,11 @@ def safe_json_dumps(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
+def _strip_trailing_zero_cents(text: str) -> str:
+    """Remove .00 from dollar amounts so $2,500.00 becomes $2,500."""
+    return re.sub(r"(\$[\d,]+)\.00\b", r"\1", text)
+
+
 def normalize_text(text: str, warnings: Optional[List[str]] = None) -> str:
     """Normalize text by flattening whitespace and newlines."""
     if not isinstance(text, str):
@@ -84,7 +89,8 @@ def normalize_text(text: str, warnings: Optional[List[str]] = None) -> str:
         _append_warning(warnings, ENCODING_WARNING)
     flattened = cleaned.replace("\n", " ")
     collapsed = re.sub(r"\s+", " ", flattened)
-    return collapsed.strip()
+    result = _strip_trailing_zero_cents(collapsed.strip())
+    return result
 
 
 def strip_leading_page_marker(text: str) -> str:
