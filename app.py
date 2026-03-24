@@ -57,10 +57,11 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 uploaded_files = st.sidebar.file_uploader(
-    "",
+    "Upload exam files",
     type=["docx", "txt"],
     accept_multiple_files=True,
     key=st.session_state.get("uploader_key", "uploaded_files_v1"),
+    label_visibility="collapsed",
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
