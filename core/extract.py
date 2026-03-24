@@ -189,7 +189,25 @@ def extract_txt(content: bytes, filename: str) -> Dict[str, Any]:
     }
 
 
-def build_document_signals(files: List[Any]) -> List[Dict[str, Any]]:
+def _docx_to_txt_bytes(content: bytes) -> bytes:
+    """Extract plain text from a DOCX file and return it as UTF-8 bytes."""
+    doc = Document(io.BytesIO(content))
+    lines: List[str] = []
+    for paragraph in doc.paragraphs:
+        text = paragraph.text or ""
+        if text.strip():
+            lines.append(text)
+    for table in doc.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for para in cell.paragraphs:
+                    text = para.text or ""
+                    if text.strip():
+                        lines.append(text)
+    return "\n".join(lines).encode("utf-8")
+
+
+def build_document_signals(files: List[Any], docx_as_txt: bool = False) -> List[Dict[str, Any]]:
     """Convert uploaded files into document signal structures."""
     signals: List[Dict[str, Any]] = []
     for uploaded in files:
@@ -206,7 +224,11 @@ def build_document_signals(files: List[Any]) -> List[Dict[str, Any]]:
             content = content.encode("utf-8")
         lower = filename.lower()
         if lower.endswith(".docx"):
-            signals.append(extract_docx(content, filename))
+            if docx_as_txt:
+                txt_content = _docx_to_txt_bytes(content)
+                signals.append(extract_txt(txt_content, filename))
+            else:
+                signals.append(extract_docx(content, filename))
         elif lower.endswith(".txt"):
             signals.append(extract_txt(content, filename))
         else:

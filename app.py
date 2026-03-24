@@ -64,6 +64,7 @@ uploaded_files = st.sidebar.file_uploader(
     label_visibility="collapsed",
 )
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""))
+docx_as_txt = st.sidebar.toggle("Convert DOCX to TXT first", value=False, help="Extract plain text from DOCX before parsing (can improve results for some files)")
 debug_mode = st.sidebar.toggle("Debug mode", value=False, help="Show document signal and raw model output")
 
 if uploaded_files:
@@ -113,7 +114,7 @@ if parse_clicked:
                 unsafe_allow_html=True,
             )
             try:
-                signals = build_document_signals(uploaded_files)
+                signals = build_document_signals(uploaded_files, docx_as_txt=docx_as_txt)
                 parsed, errors, raw_outputs = parse_with_llm(signals, category or "", model=model)
             except Exception as exc:  # noqa: BLE001 - show user-friendly errors
                 st.error(f"Parsing failed: {exc}")
