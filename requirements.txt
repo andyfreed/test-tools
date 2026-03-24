@@ -1,6 +1,7 @@
 streamlit
 python-docx
 openai>=1.40.0
+anthropic>=0.39.0
 python-dotenv
 pydantic
 pandas

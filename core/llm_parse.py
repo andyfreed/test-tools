@@ -7,6 +7,11 @@ import httpx
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 
+try:
+    import anthropic
+except ImportError:
+    anthropic = None  # type: ignore[assignment]
+
 from .prompts import build_repair_prompt, build_system_prompt, build_user_prompt
 from .utils import normalize_question_fields, safe_json_dumps
 from .validate import validate_parsed_questions
@@ -72,6 +77,7 @@ EXAM_SCHEMA = {
 }
 
 RESPONSES_API_MODELS = {"gpt-5.4-pro", "gpt-5.4"}
+CLAUDE_MODELS = {"claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"}
 CHUNK_SIZE = 30
 
 # ---------------------------------------------------------------------------
@@ -124,7 +130,53 @@ def _parse_response_to_json(response: Any) -> Tuple[Dict[str, Any], str]:
 # Model call
 # ---------------------------------------------------------------------------
 
+def _is_claude_model(model: str) -> bool:
+    """Check if the model is a Claude/Anthropic model."""
+    return model in CLAUDE_MODELS or model.startswith("claude-")
+
+
+def _call_claude(system_prompt: str, user_prompt: str, response_format: Dict[str, Any], model: str) -> Tuple[Dict[str, Any], str]:
+    """Call the Anthropic Claude API and return parsed JSON + raw text."""
+    if anthropic is None:
+        raise RuntimeError("anthropic package is not installed. Run: pip install anthropic")
+    load_dotenv()
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise RuntimeError("ANTHROPIC_API_KEY is not set. Add it to your .env file.")
+    client = anthropic.Anthropic(api_key=api_key)
+    schema_hint = (
+        "\n\nYou MUST respond with ONLY valid JSON matching this schema — no markdown, no code fences, no extra text:\n"
+        + json.dumps(response_format, indent=2)
+    )
+    try:
+        response = client.messages.create(
+            model=model,
+            max_tokens=16384,
+            system=system_prompt + schema_hint,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+        raw_text = ""
+        for block in response.content:
+            if hasattr(block, "text"):
+                raw_text += block.text
+        # Strip markdown code fences if the model wrapped the JSON
+        stripped = raw_text.strip()
+        if stripped.startswith("```"):
+            stripped = re.sub(r"^```(?:json)?\s*\n?", "", stripped)
+            stripped = re.sub(r"\n?```\s*$", "", stripped)
+        parsed: Dict[str, Any] = {}
+        try:
+            parsed = json.loads(stripped)
+        except json.JSONDecodeError:
+            parsed = {}
+        return parsed, raw_text
+    except Exception as exc:
+        raise RuntimeError(f"Anthropic call failed: {exc}") from exc
+
+
 def _call_model(system_prompt: str, user_prompt: str, response_format: Dict[str, Any], model: str) -> Tuple[Dict[str, Any], str]:
+    if _is_claude_model(model):
+        return _call_claude(system_prompt, user_prompt, response_format, model)
     load_dotenv()
     http_client = httpx.Client(trust_env=False)
     client = OpenAI(http_client=http_client)
@@ -208,19 +260,20 @@ def _chunk_signals(
         key = _items_key(sig)
         items = sig.get(key, [])
 
-        # Find question-start positions
+        # Identify the answer-key block so we can exclude it from question starts
+        answer_key = _find_answer_key_section(items)
+        ak_indices = {item.get("i") for item in answer_key}
+
+        # Find question-start positions, excluding answer-key lines
         q_starts = [
             i for i, item in enumerate(items)
             if _is_question_start(item.get("text", ""))
+            and item.get("i") not in ak_indices
         ]
 
         if len(q_starts) <= chunk_size:
             chunks.append([sig])
             continue
-
-        # Identify the answer-key block so we can append it to every chunk
-        answer_key = _find_answer_key_section(items)
-        ak_indices = {item.get("i") for item in answer_key}
 
         for g in range(0, len(q_starts), chunk_size):
             start = q_starts[g]
