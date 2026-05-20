@@ -66,7 +66,7 @@ uploaded_files = st.sidebar.file_uploader(
 category = st.sidebar.text_input("Category", value=st.session_state.get("category", ""), placeholder="e.g. Chapter 1")
 
 model_default = os.getenv("OPENAI_MODEL", "gpt-5.5")
-allowed_models = ["gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-pro", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini", "claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"]
+allowed_models = ["gpt-5.5", "gpt-5.5-pro", "gpt-5.4", "gpt-5.4-pro", "gpt-5.2", "gpt-5-mini", "gpt-5-nano", "gpt-4.1", "gpt-4o-mini", "o4-mini", "claude-opus-4-7", "claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"]
 model_options = allowed_models + ["Custom"]
 default_model_choice = model_default if model_default in allowed_models else "Custom"
 model_choice = st.sidebar.selectbox(
