@@ -76,7 +76,7 @@ EXAM_SCHEMA = {
     },
 }
 
-RESPONSES_API_MODELS = {"gpt-5.4-pro", "gpt-5.4"}
+RESPONSES_API_MODELS = {"gpt-5.5-pro", "gpt-5.5", "gpt-5.4-pro", "gpt-5.4"}
 CLAUDE_MODELS = {"claude-sonnet-4-6", "claude-opus-4-6", "claude-haiku-4-5-20251001"}
 CHUNK_SIZE = 20
 
@@ -308,7 +308,7 @@ def _chunk_signals(
 def parse_with_llm(
     document_signal: List[Dict[str, Any]],
     category: str,
-    model: str = os.getenv("OPENAI_MODEL", "gpt-5.4"),
+    model: str = os.getenv("OPENAI_MODEL", "gpt-5.5"),
     max_repairs: int = 2,
     on_chunk_complete: Any = None,
 ) -> Tuple[Dict[str, Any], List[str], List[str]]:
